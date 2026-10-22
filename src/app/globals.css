@@ -11,6 +11,7 @@
   --text-secondary: #000000;
   --text-tertiary: #777777;
   
+
 --button-gradient: linear-gradient(
   100deg,
   #0000ff 0%,
@@ -19,6 +20,7 @@
 
   --border-default: #e5e5e5;
 }
+
 
 @theme inline {
   --color-background: var(--background);
