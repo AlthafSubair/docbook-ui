@@ -1,4 +1,3 @@
-import React from "react";
 
 interface HearderProps {
   className?: string;
@@ -11,7 +10,7 @@ const Hearder = ({ className = "" }: HearderProps) => {
         viewBox="0 0 376 135"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-58 block"
+        className="w-full h-36 md:h-48 block"
         preserveAspectRatio="none"
       >
         <path

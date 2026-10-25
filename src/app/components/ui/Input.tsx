@@ -62,7 +62,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       .join(" ") || undefined;
 
   const fieldStyles = [
-    "flex items-center gap-3 rounded-xl border-2 bg-white px-4 py-3",
+    "flex items-center gap-3 rounded-xl border-2 bg-white px-4 py-2.5",
     "transition-[border-color,box-shadow] duration-200",
     error
       ? "border-red-500 shadow-[0_2px_8px_rgba(239,68,68,0.3)] focus-within:shadow-[0_0_0_3px_rgba(239,68,68,0.25)]"

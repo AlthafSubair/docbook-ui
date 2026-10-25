@@ -8,7 +8,8 @@
   --foreground: #000000;
 
   --text-primary: #0000ff;
-  --text-secondary: #000000;
+  --text-primary-dark: #000099;
+  --text-secondary: #3C3A3A;
   --text-tertiary: #777777;
   
 
@@ -19,6 +20,8 @@
 );
 
   --border-default: #e5e5e5;
+
+  --font-size-sm: 14px;
 }
 
 
@@ -27,10 +30,14 @@
   --color-foreground: var(--foreground);
 
   --color-primary: var(--text-primary);
+  --color-primary-dark: var(--text-primary-dark);
+  --color-secondary: var(--text-secondary);
   --color-secondary-text: var(--text-secondary);
   --color-tertiary-text: var(--text-tertiary);
 
   --color-border-default: var(--border-default);
+
+  --text-sm: 14px;
 }
 
 * {
