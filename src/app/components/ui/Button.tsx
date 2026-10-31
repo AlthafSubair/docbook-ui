@@ -1,15 +1,17 @@
-// src/app/components/ui/button.tsx
+// src/app/components/ui/Button.tsx
 import type { ButtonHTMLAttributes } from "react";
+import { Spinner } from "./Spinner";
 
 type ButtonVariant = "primary" | "secondary";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
+  isLoading?: boolean;
 };
 
 const baseStyles = [
   // Layout and shape
-  "group relative isolate inline-flex items-center justify-center",
+  "group relative isolate inline-flex items-center justify-center gap-2",
   "rounded-lg border-2 border-transparent px-5 py-2 text-base font-medium",
 
   // Gradient painted behind the transparent border (always visible as the border)
@@ -28,18 +30,20 @@ const baseStyles = [
 const labelBaseStyles =
   "relative inline-block bg-[image:var(--button-gradient)] bg-clip-text transition-colors duration-200";
 
-const variantStyles: Record<ButtonVariant, { button: string; label: string }> = {
+const variantStyles: Record<ButtonVariant, { button: string; label: string; spinner: string }> = {
   primary: {
     // Fill hidden by default (gradient shows), white fill on hover
     button: "before:opacity-0 enabled:hover:before:opacity-100",
     // White text by default, gradient text on hover
     label: "text-white group-enabled:group-hover:text-transparent",
+    spinner: "text-white group-enabled:group-hover:text-primary",
   },
   secondary: {
     // White fill by default, fill hidden on hover (gradient shows)
     button: "before:opacity-100 enabled:hover:before:opacity-0",
     // Gradient text by default, white text on hover
     label: "text-transparent group-enabled:group-hover:text-white",
+    spinner: "text-primary group-enabled:group-hover:text-white",
   },
 };
 
@@ -48,16 +52,22 @@ export function Button({
   variant = "primary",
   type = "button",
   className = "",
+  isLoading = false,
+  disabled = false,
   ...props
 }: ButtonProps) {
   const styles = variantStyles[variant];
+  const isDisabled = disabled || isLoading;
 
   return (
     <button
       type={type}
-      className={`${baseStyles} ${styles.button} ${className}`.trim()}
+      disabled={isDisabled}
+      aria-busy={isLoading}
+      className={`${baseStyles} ${styles.button} ${isLoading ? "cursor-wait" : ""} ${className}`.trim()}
       {...props}
     >
+      {isLoading && <Spinner size="sm" className={styles.spinner} />}
       <span className={`${labelBaseStyles} ${styles.label}`}>{children}</span>
     </button>
   );

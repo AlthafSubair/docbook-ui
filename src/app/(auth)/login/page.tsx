@@ -30,8 +30,8 @@ const LoginPage = () => {
 
         <div className="w-full">
           <form className="flex flex-col gap-4">
-            <Input type="phone" placeholder="Phone Number" icon={<Phone />} />
-            <Button className="w-full">Verify and proceed</Button>
+            <Input type="tel" placeholder="Phone Number" icon={<Phone />} />
+            <Button className="w-full" >Verify and proceed</Button>
           </form>
         </div>
       </div>
