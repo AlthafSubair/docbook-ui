@@ -1,5 +1,5 @@
 
-import Hearder from "@/app/components/ui/Hearder";
+import Header from "@/app/components/ui/Header";
 
 export default function AuthLayout({
   children,
@@ -8,8 +8,8 @@ export default function AuthLayout({
 }) {
   return (
     <div className="flex min-h-screen w-full flex-col">
-      <Hearder />
-      {children}
+      <Header />
+      <main className="flex flex-1 flex-col">{children}</main>
     </div>
   );
 }

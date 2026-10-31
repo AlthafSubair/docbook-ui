@@ -1,9 +1,9 @@
 
-interface HearderProps {
+interface HeaderProps {
   className?: string;
 }
 
-const Hearder = ({ className = "" }: HearderProps) => {
+const Header = ({ className = "" }: HeaderProps) => {
   return (
     <div className={`w-full overflow-hidden md:hidden ${className}`.trim()}>
       <svg
@@ -36,4 +36,4 @@ const Hearder = ({ className = "" }: HearderProps) => {
   );
 };
 
-export default Hearder;
+export default Header;
