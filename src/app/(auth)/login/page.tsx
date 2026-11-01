@@ -1,12 +1,9 @@
 import Image from "next/image";
 
-import { Phone } from "lucide-react";
-
 import Title from "@/app/components/ui/Title";
 import Desc from "@/app/components/ui/Desc";
-import { Input } from "@/app/components/ui/Input";
 import { Button } from "@/app/components/ui/Button";
-
+import { PhoneInput } from "@/app/components/ui/PhoneInput";
 
 const LoginPage = () => {
   return (
@@ -14,7 +11,9 @@ const LoginPage = () => {
       <div className="flex flex-1 flex-col justify-between items-center gap-4 sm:p-12 p-8">
         <div className="flex flex-col gap-2">
           <Title className="text-center">Welcome to DocBook</Title>
-          <Desc className="text-center">Book your doctor’s appointment quickly and easily</Desc>
+          <Desc className="text-center">
+            Book your doctor’s appointment quickly and easily
+          </Desc>
         </div>
 
         <div className="flex justify-center items-center">
@@ -30,8 +29,8 @@ const LoginPage = () => {
 
         <div className="w-full">
           <form className="flex flex-col gap-4">
-            <Input type="tel" placeholder="Phone Number" icon={<Phone />} />
-            <Button className="w-full" >Verify and proceed</Button>
+            <PhoneInput name="phone" defaultCountry="IN" required />
+            <Button className="w-full">Verify and proceed</Button>
           </form>
         </div>
       </div>

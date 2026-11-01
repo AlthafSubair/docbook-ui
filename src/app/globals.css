@@ -1,4 +1,3 @@
-
 @import "tailwindcss";
 
 :root {
@@ -11,19 +10,13 @@
   --text-primary-dark: #000099;
   --text-secondary: #3C3A3A;
   --text-tertiary: #777777;
-  
 
---button-gradient: linear-gradient(
-  100deg,
-  #0000ff 0%,
-  #000099 100%
-);
+  --button-gradient: linear-gradient(100deg, #0000ff 0%, #000099 100%);
 
   --border-default: #e5e5e5;
 
   --font-size-sm: 14px;
 }
-
 
 @theme inline {
   --color-background: var(--background);
@@ -50,8 +43,50 @@ body {
   min-height: 100%;
 }
 
+html {
+  /* Stop iOS Safari / Android Chrome from resizing text on rotate */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Remove the grey flash on tap (iOS / Android) */
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Form controls: consistent across Safari, Chrome, Firefox, Edge */
+input,
+button,
+select,
+textarea {
+  font: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0;
+  touch-action: manipulation; /* removes 300ms tap delay, blocks double-tap zoom */
+}
+
+/* iOS Safari zooms the page if an input's font-size is below 16px */
+input {
+  font-size: 16px;
+}
+
+/* Keep autofill from turning the field yellow/blue (Chrome, Safari, Edge) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+  -webkit-text-fill-color: var(--text-secondary);
+  caret-color: var(--text-secondary);
+}
+
+/* Hide the Windows/Edge "reveal password" and clear (X) buttons */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
 }
