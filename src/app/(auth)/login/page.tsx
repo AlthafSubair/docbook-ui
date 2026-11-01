@@ -29,8 +29,15 @@ const LoginPage = () => {
 
         <div className="w-full">
           <form className="flex flex-col gap-4">
-            <PhoneInput name="phone" defaultCountry="IN" required />
-            <Button className="w-full">Verify and proceed</Button>
+            <PhoneInput
+              name="phone"
+              defaultCountry="IN"
+              required
+              aria-label="Phone number"
+            />
+            <Button type="submit" className="w-full">
+              Verify and proceed
+            </Button>
           </form>
         </div>
       </div>

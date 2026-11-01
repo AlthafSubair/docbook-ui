@@ -60,15 +60,15 @@ body {
 }
 
 /* Form controls: consistent across Safari, Chrome, Firefox, Edge */
-input,
-button,
-select,
-textarea {
-  font: inherit;
-  -webkit-appearance: none;
-  appearance: none;
-  border-radius: 0;
-  touch-action: manipulation; /* removes 300ms tap delay, blocks double-tap zoom */
+@layer base {
+  input,
+  select,
+  textarea {
+    font: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+    touch-action: manipulation; /* removes 300ms tap delay, blocks double-tap zoom */
+  }
 }
 
 /* iOS Safari zooms the page if an input's font-size is below 16px */

@@ -86,6 +86,7 @@ type PhoneInputProps = {
   direction?: "auto" | "up" | "down";
   onChange?: (value: PhoneValue) => void;
   containerClassName?: string;
+  "aria-label"?: string;
 };
 
 export function PhoneInput({
@@ -102,6 +103,7 @@ export function PhoneInput({
   direction = "auto",
   onChange,
   containerClassName = "",
+  "aria-label": ariaLabel,
 }: PhoneInputProps) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
@@ -340,6 +342,7 @@ export function PhoneInput({
             value={national}
             onChange={(e) => handleInput(e.target.value)}
             onBlur={() => setTouched(true)}
+            aria-label={ariaLabel || label || placeholder || "Phone number"}
             aria-invalid={shownError ? true : undefined}
             aria-describedby={message ? messageId : undefined}
             className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-secondary-text outline-none placeholder:text-tertiary-text disabled:cursor-not-allowed"

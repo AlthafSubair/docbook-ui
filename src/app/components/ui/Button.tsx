@@ -12,18 +12,19 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 const baseStyles = [
   // Layout and shape
   "group relative isolate inline-flex items-center justify-center gap-2",
-  "rounded-lg border-2 border-transparent px-5 py-2 text-base font-medium",
+  "min-h-12 rounded-xl overflow-hidden border-2 border-transparent px-5 py-2.5 text-base font-semibold cursor-pointer",
 
   // Gradient painted behind the transparent border (always visible as the border)
   "bg-[image:var(--button-gradient)] bg-origin-border",
 
   // Inner fill layer (covers the padding area only, so the gradient border stays visible)
-  "before:absolute before:inset-0 before:-z-10 before:rounded-md before:bg-white",
+  "before:absolute before:inset-0 before:-z-10 before:rounded-[10px] before:bg-white",
   "before:transition-opacity before:duration-200",
 
   // Interaction
-  "transition-colors duration-200",
+  "transition-all duration-150",
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+  "enabled:active:scale-[0.99] enabled:active:opacity-95",
   "disabled:cursor-not-allowed disabled:opacity-50",
 ].join(" ");
 
