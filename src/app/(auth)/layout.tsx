@@ -1,4 +1,5 @@
 import Header from "@/app/components/ui/Header";
+import AuthShowcase from "@/app/components/auth/AuthShowcase";
 
 export default function AuthLayout({
   children,
@@ -6,9 +7,17 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen lg:h-screen w-full flex-col lg:overflow-hidden">
+    <div className="flex min-h-screen lg:h-screen w-full flex-col lg:flex-row lg:overflow-hidden bg-background text-foreground">
+      {/* Mobile Top Header (only visible on mobile/tablet) */}
       <Header />
-      <main className="flex flex-1 flex-col lg:min-h-0 lg:overflow-hidden">{children}</main>
+
+      {/* Desktop Showcase & Branding (Visible on lg screens and above) */}
+      <AuthShowcase />
+
+      {/* Main Content Area (Login / OTP / etc.) */}
+      <main className="flex flex-1 flex-col lg:h-full lg:overflow-y-auto">
+        {children}
+      </main>
     </div>
   );
 }
