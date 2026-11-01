@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react";
 import Image from "next/image";
 
 import Title from "@/app/components/ui/Title";
@@ -11,10 +12,18 @@ import { useRouter } from "next/navigation";
 const LoginPage = () => {
 
   const router = useRouter()
+  const [phoneVal, setPhoneVal] = useState<string>("")
 
   const onLogin = (e?: React.FormEvent) => {
     e?.preventDefault();
-    router.push('/verify-otp');
+    if (phoneVal) {
+      try {
+        localStorage.setItem("docbook_user_phone", phoneVal);
+      } catch {}
+      router.push(`/verify-otp?phone=${encodeURIComponent(phoneVal)}`);
+    } else {
+      router.push('/verify-otp');
+    }
   };
 
   return (
@@ -45,6 +54,7 @@ const LoginPage = () => {
               defaultCountry="IN"
               required
               aria-label="Phone number"
+              onChange={(val) => setPhoneVal(val.e164)}
             />
             <Button type="submit" className="w-full">
               Verify and proceed

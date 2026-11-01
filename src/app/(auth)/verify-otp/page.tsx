@@ -126,8 +126,14 @@ function VerifyOTPContent() {
     // Simulate verification delay
     setTimeout(() => {
       setIsVerifying(false);
-      // Navigate on success (e.g. to dashboard or next step)
-      router.push("/");
+      if (phone) {
+        try {
+          localStorage.setItem("docbook_user_phone", phone);
+        } catch {}
+        router.push(`/patients?phone=${encodeURIComponent(phone)}`);
+      } else {
+        router.push("/patients");
+      }
     }, 1000);
   };
 
@@ -231,6 +237,7 @@ function VerifyOTPContent() {
               className="w-full"
               disabled={!isComplete || isVerifying}
               isLoading={isVerifying}
+              onClick={handleSubmit}
             >
               Verify and proceed
             </Button>
