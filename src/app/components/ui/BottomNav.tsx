@@ -41,30 +41,30 @@ export const navItems: NavItem[] = [
   },
 ];
 
+export const isNavItemActive = (pathname: string | null, href: string) => {
+  if (href === "/clinics") {
+    return (
+      pathname === "/" ||
+      pathname === "/clinics" ||
+      pathname?.startsWith("/clinics/") ||
+      pathname?.startsWith("/doctors")
+    );
+  }
+  return pathname === href || (pathname ? pathname.startsWith(`${href}/`) : false);
+};
+
 export const BottomNav: React.FC = () => {
   const pathname = usePathname();
-
-  const isItemActive = (href: string) => {
-    if (href === "/clinics") {
-      return (
-        pathname === "/" ||
-        pathname === "/clinics" ||
-        pathname?.startsWith("/clinics/") ||
-        pathname?.startsWith("/doctors")
-      );
-    }
-    return pathname === href || pathname?.startsWith(`${href}/`);
-  };
 
   return (
     <nav
       aria-label="Mobile navigation"
-      className="fixed bottom-3 inset-x-0 z-50 pointer-events-none flex justify-center px-3 sm:px-4"
+      className="fixed bottom-3 inset-x-0 z-50 pointer-events-none flex justify-center px-3 sm:px-4 lg:hidden"
     >
       {/* Detached floating dock using full width with reduced compact height */}
       <div className="pointer-events-auto flex items-center justify-between w-full max-w-2xl h-14 p-1 rounded-full bg-white/95 backdrop-blur-xl border-2 border-primary/40 shadow-[0_8px_30px_rgba(0,0,255,0.14),0_2px_8px_rgba(0,0,0,0.06)] select-none">
         {navItems.map((item) => {
-          const active = isItemActive(item.href);
+          const active = isNavItemActive(pathname, item.href);
           const Icon = item.icon;
 
           return (
@@ -119,5 +119,3 @@ export const BottomNav: React.FC = () => {
 };
 
 export default BottomNav;
-
-

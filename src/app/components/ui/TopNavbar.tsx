@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { MapPin, ChevronDown, Check, Stethoscope } from "lucide-react";
+import { navItems, isNavItemActive } from "@/app/components/ui/BottomNav";
 
 const POPULAR_LOCATIONS = [
   "Kochi, Kerala",
@@ -19,6 +21,7 @@ export interface TopNavbarProps {
 }
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({ className = "" }) => {
+  const pathname = usePathname();
   const [selectedLocation, setSelectedLocation] = useState("Kochi, Kerala");
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -60,11 +63,11 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ className = "" }) => {
     <header
       className={`sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-slate-100/90 shadow-[0_1px_3px_rgba(0,0,0,0.02)] ${className}`.trim()}
     >
-      <div className="w-full max-w-2xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
+      <div className="w-full max-w-2xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
         {/* Left Side: Branding */}
         <Link
           href="/clinics"
-          className="flex items-center gap-2 group select-none"
+          className="flex items-center gap-2 group select-none shrink-0"
           title="DocBook Home"
         >
           <div className="size-8 rounded-xl bg-[image:var(--button-gradient)] flex items-center justify-center text-white shadow-xs shadow-primary/20 group-hover:scale-105 transition-transform">
@@ -77,8 +80,52 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ className = "" }) => {
           </div>
         </Link>
 
+        {/* Center: Desktop Navigation Links in between brand and location */}
+        <nav
+          aria-label="Desktop navigation"
+          className="hidden lg:flex flex-1 items-center justify-center gap-6 xl:gap-8"
+        >
+          {navItems.map((item) => {
+            const active = isNavItemActive(pathname, item.href);
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                className={`flex items-center gap-2 text-sm transition-colors py-1 group ${
+                  active
+                    ? "text-primary font-bold"
+                    : "text-slate-600 hover:text-primary font-medium"
+                }`}
+              >
+                <Icon
+                  className={`size-4.5 transition-colors ${
+                    active
+                      ? "stroke-[2.4] text-primary"
+                      : "stroke-2 text-slate-500 group-hover:text-primary"
+                  }`}
+                />
+                <span className="whitespace-nowrap">{item.label}</span>
+
+                {item.badge !== undefined && (
+                  <span
+                    className={`min-w-[18px] h-4.5 px-1 rounded-full text-[11px] font-bold flex items-center justify-center transition-colors ${
+                      active
+                        ? "bg-primary text-white"
+                        : "bg-slate-100 text-slate-600 group-hover:bg-primary/10 group-hover:text-primary"
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
         {/* Right Side: Location Selector */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative shrink-0" ref={dropdownRef}>
           <button
             type="button"
             onClick={() => setIsOpen((prev) => !prev)}

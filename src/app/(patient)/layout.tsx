@@ -6,11 +6,10 @@ const PatientLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex min-h-screen w-full flex-col">
       <TopNavbar />
-      <main className="flex flex-1 flex-col pb-20">{children}</main>
+      <main className="flex flex-1 flex-col pb-20 lg:pb-8">{children}</main>
       <BottomNav />
     </div>
   );
 };
 
 export default PatientLayout;
-
