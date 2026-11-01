@@ -98,17 +98,6 @@ export default function ClinicsPage() {
 
   return (
     <div className="flex flex-1 flex-col w-full px-4 py-4 md:py-8 max-w-2xl mx-auto gap-5">
-      {/* Top Location Bar */}
-      <div className="flex items-center justify-between gap-2 text-xs">
-        <div className="flex items-center gap-1.5 text-secondary-text">
-          <MapPin className="size-4 text-primary shrink-0" />
-          <span className="font-semibold text-slate-800">Current Location:</span>
-          <span className="text-primary font-medium hover:underline cursor-pointer">
-            Kochi, Kerala
-          </span>
-        </div>
-      </div>
-
       {/* Page Title & Desc */}
       <div className="flex flex-col gap-1">
         <Title className="text-2xl md:text-3xl font-bold">
