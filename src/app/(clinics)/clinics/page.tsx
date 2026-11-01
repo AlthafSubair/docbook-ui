@@ -16,19 +16,7 @@ import {
 
 import Title from "@/app/components/ui/Title";
 import Desc from "@/app/components/ui/Desc";
-
-interface Clinic {
-  id: string;
-  name: string;
-  specialty: string;
-  rating: number;
-  reviewsCount: number;
-  address: string;
-  distance: string;
-  openStatus: string;
-  availableDoctors: number;
-  phone: string;
-}
+import { CLINICS } from "@/lib/clinicData";
 
 const CATEGORIES = [
   "All",
@@ -40,50 +28,11 @@ const CATEGORIES = [
   "Orthopedics",
 ];
 
-const INITIAL_CLINICS: Clinic[] = [
-  {
-    id: "cl_1",
-    name: "DocBook City Health Clinic",
-    specialty: "Multi-Specialty Care",
-    rating: 4.9,
-    reviewsCount: 320,
-    address: "MG Road, Central Junction",
-    distance: "1.2 km away",
-    openStatus: "Open until 8:00 PM",
-    availableDoctors: 8,
-    phone: "+91 98765 43210",
-  },
-  {
-    id: "cl_2",
-    name: "Lotus Wellness & Specialty Care",
-    specialty: "Pediatrics & Family Care",
-    rating: 4.8,
-    reviewsCount: 215,
-    address: "Park Avenue, Near Metro Station",
-    distance: "2.4 km away",
-    openStatus: "Open 24/7",
-    availableDoctors: 5,
-    phone: "+91 98765 43211",
-  },
-  {
-    id: "cl_3",
-    name: "Apex Heart & Vascular Institute",
-    specialty: "Cardiology & Diagnostics",
-    rating: 4.9,
-    reviewsCount: 410,
-    address: "Civil Lines, Health Hub Complex",
-    distance: "3.8 km away",
-    openStatus: "Open until 9:30 PM",
-    availableDoctors: 12,
-    phone: "+91 98765 43212",
-  },
-];
-
 export default function ClinicsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  const filteredClinics = INITIAL_CLINICS.filter((clinic) => {
+  const filteredClinics = CLINICS.filter((clinic) => {
     const matchesSearch =
       clinic.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       clinic.specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -169,9 +118,10 @@ export default function ClinicsPage() {
           </div>
         ) : (
           filteredClinics.map((clinic) => (
-            <div
+            <Link
               key={clinic.id}
-              className="group rounded-2xl border-2 border-primary/40 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,255,0.06)] hover:border-primary hover:shadow-md transition-all flex flex-col gap-3"
+              href={`/clinics/${clinic.id}`}
+              className="group rounded-2xl border-2 border-primary/40 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,255,0.06)] hover:border-primary hover:shadow-md transition-all flex flex-col gap-3 cursor-pointer"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
@@ -205,15 +155,12 @@ export default function ClinicsPage() {
                   <span>{clinic.openStatus}</span>
                 </div>
 
-                <Link
-                  href={`/doctors?clinicId=${clinic.id}`}
-                  className="inline-flex items-center gap-1 font-bold text-primary hover:underline"
-                >
+                <div className="inline-flex items-center gap-1 font-bold text-primary group-hover:underline">
                   <span>{clinic.availableDoctors} Doctors Available</span>
                   <ChevronRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
+                </div>
               </div>
-            </div>
+            </Link>
           ))
         )}
       </div>
