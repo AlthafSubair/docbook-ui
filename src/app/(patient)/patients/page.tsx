@@ -175,7 +175,7 @@ function PatientsContent() {
 
     // Navigate to next page (e.g. doctor selection or appointment booking)
     setTimeout(() => {
-      router.push(`/doctors?patientId=${encodeURIComponent(profile.id)}`);
+      router.push(`/clinics?patientId=${encodeURIComponent(profile.id)}`);
     }, 250);
   };
 
