@@ -1,11 +1,22 @@
+"use client"
+
 import Image from "next/image";
 
 import Title from "@/app/components/ui/Title";
 import Desc from "@/app/components/ui/Desc";
 import { Button } from "@/app/components/ui/Button";
 import { PhoneInput } from "@/app/components/ui/PhoneInput";
+import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
+
+  const router = useRouter()
+
+  const onLogin = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    router.push('/verify-otp');
+  };
+
   return (
     <div className="flex flex-1 flex-col w-full">
       <div className="flex flex-1 flex-col justify-between items-center gap-4 sm:p-12 p-8">
@@ -28,7 +39,7 @@ const LoginPage = () => {
         </div>
 
         <div className="w-full">
-          <form className="flex flex-col gap-4">
+          <form onSubmit={onLogin} className="flex flex-col gap-4">
             <PhoneInput
               name="phone"
               defaultCountry="IN"

@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  useCallback,
   useEffect,
   useId,
   useMemo,
@@ -110,7 +109,7 @@ export function PhoneInput({
   const listboxId = `${inputId}-listbox`;
   const messageId = `${inputId}-message`;
 
-  const countries = useMemo(getCountryList, []);
+  const countries = useMemo(() => getCountryList(), []);
 
   const [country, setCountry] = useState<CountryCode>(defaultCountry);
   const [national, setNational] = useState("");
@@ -142,19 +141,16 @@ export function PhoneInput({
     );
   }, [countries, query]);
 
-  const apply = useCallback(
-    (nextCountry: CountryCode, nextNational: string) => {
-      setCountry(nextCountry);
-      setNational(nextNational);
-      const result = compute(nextCountry, nextNational);
-      onChange?.({
-        country: nextCountry,
-        national: nextNational,
-        ...result,
-      });
-    },
-    [onChange],
-  );
+  const apply = (nextCountry: CountryCode, nextNational: string) => {
+    setCountry(nextCountry);
+    setNational(nextNational);
+    const result = compute(nextCountry, nextNational);
+    onChange?.({
+      country: nextCountry,
+      national: nextNational,
+      ...result,
+    });
+  };
 
   /* ---- typing / pasting ------------------------------------------ */
   const handleInput = (raw: string) => {
@@ -201,10 +197,10 @@ export function PhoneInput({
     setOpen(true);
   };
 
-  const closeMenu = useCallback((returnFocus = false) => {
+  const closeMenu = (returnFocus = false) => {
     setOpen(false);
     if (returnFocus) triggerRef.current?.focus();
-  }, []);
+  };
 
   const choose = (c: Country) => {
     apply(c.code, national);
