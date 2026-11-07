@@ -7,7 +7,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen lg:h-screen w-full flex-col lg:flex-row lg:overflow-hidden bg-background text-foreground">
+    <div className="flex h-[100dvh] w-full flex-col lg:flex-row lg:overflow-hidden bg-background text-foreground overflow-hidden">
       {/* Mobile Top Header (only visible on mobile/tablet) */}
       <Header />
 
@@ -15,7 +15,7 @@ export default function AuthLayout({
       <AuthShowcase />
 
       {/* Main Content Area (Login / OTP / etc.) */}
-      <main className="flex flex-1 flex-col lg:h-full lg:overflow-y-auto">
+      <main className="flex flex-1 flex-col min-h-0 overflow-y-auto lg:h-full">
         {children}
       </main>
     </div>

@@ -1,16 +1,15 @@
-
 interface HeaderProps {
   className?: string;
 }
 
 const Header = ({ className = "" }: HeaderProps) => {
   return (
-    <div className={`w-full overflow-hidden lg:hidden ${className}`.trim()}>
+    <div className={`w-full overflow-hidden lg:hidden shrink-0 ${className}`.trim()}>
       <svg
         viewBox="0 0 376 135"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-28 sm:h-32 md:h-36 block"
+        className="w-full h-20 sm:h-24 md:h-28 block"
         preserveAspectRatio="none"
       >
         <path

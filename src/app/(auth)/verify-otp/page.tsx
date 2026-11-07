@@ -138,7 +138,7 @@ function VerifyOTPContent() {
   };
 
   return (
-    <div className="flex flex-1 flex-col justify-between items-center gap-3 sm:gap-4 p-6 sm:py-6 sm:px-10 md:py-6 md:px-12 lg:py-8 lg:px-8 xl:p-12 lg:justify-center lg:gap-5 xl:gap-7 w-full bg-background min-h-full">
+    <div className="flex flex-1 flex-col justify-between items-center gap-2 sm:gap-4 px-5 py-3 sm:py-6 sm:px-10 md:py-6 md:px-12 lg:py-8 lg:px-8 xl:p-12 lg:justify-center lg:gap-5 xl:gap-7 w-full bg-background min-h-full">
       <div className="flex flex-col gap-1.5 sm:gap-2 w-full max-w-md shrink-0">
         <Title className="text-center">Verify with OTP</Title>
         <Desc className="text-center">
@@ -160,14 +160,14 @@ function VerifyOTPContent() {
           width={280}
           height={280}
           priority
-          className="w-44 sm:w-52 md:w-56 lg:w-48 xl:w-60 h-auto max-h-[22vh] lg:max-h-[19vh] xl:max-h-[23vh] max-w-full object-contain"
+          className="w-36 sm:w-44 md:w-52 lg:w-48 xl:w-60 h-auto max-h-[18dvh] sm:max-h-[20dvh] lg:max-h-[19vh] xl:max-h-[23vh] max-w-full object-contain"
         />
       </div>
 
-      <div className="w-full max-w-sm shrink-0">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
+      <div className="w-full max-w-sm shrink-0 pb-2 sm:pb-0">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:gap-4">
           {/* 6-digit OTP Inputs */}
-          <div className="flex justify-between items-center gap-2 sm:gap-2.5">
+          <div className="flex justify-between items-center gap-1.5 sm:gap-2.5">
             {otp.map((digit, index) => (
               <input
                 key={index}
