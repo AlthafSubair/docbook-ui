@@ -12,9 +12,8 @@ import { Check, ChevronDown, Search } from "lucide-react";
 import {
   getCountries,
   getCountryCallingCode,
-  isValidPhoneNumber,
   parsePhoneNumberFromString,
-} from "libphonenumber-js";
+} from "libphonenumber-js/max";
 import type { CountryCode } from "libphonenumber-js";
 
 /* ------------------------------------------------------------------ */
@@ -51,10 +50,35 @@ function getCountryList(): Country[] {
 
 function compute(country: CountryCode, national: string) {
   if (!national) return { e164: "", isValid: false };
+  const digits = national.replace(/\D/g, "");
+
+  // Reject all-repeated dummy sequences (e.g. 0000000000, 9999999999)
+  if (/^(\d)\1+$/.test(digits)) {
+    return {
+      e164: `+${getCountryCallingCode(country)}${digits}`,
+      isValid: false,
+    };
+  }
+
+  // India mobile numbers strictly start with 6, 7, 8, 9 and must be 10 digits
+  if (country === "IN") {
+    const isIndianMobile = /^[6-9]\d{9}$/.test(digits);
+    return {
+      e164: `+91${digits}`,
+      isValid: isIndianMobile,
+    };
+  }
+
   const parsed = parsePhoneNumberFromString(national, country);
+  const type = parsed?.getType();
+  const isValidMobile =
+    !!parsed &&
+    parsed.isValid() &&
+    (type === "MOBILE" || type === "FIXED_LINE_OR_MOBILE" || type === undefined);
+
   return {
-    e164: parsed?.number ?? `+${getCountryCallingCode(country)}${national}`,
-    isValid: isValidPhoneNumber(national, country),
+    e164: parsed?.number ?? `+${getCountryCallingCode(country)}${digits}`,
+    isValid: isValidMobile,
   };
 }
 
@@ -124,6 +148,24 @@ export function PhoneInput({
   const searchRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const userSelectedRef = useRef(false);
+  const prevDefaultCountryRef = useRef(defaultCountry);
+
+  useEffect(() => {
+    if (prevDefaultCountryRef.current !== defaultCountry) {
+      prevDefaultCountryRef.current = defaultCountry;
+      if (!userSelectedRef.current && defaultCountry) {
+        setCountry(defaultCountry);
+        const result = compute(defaultCountry, national);
+        onChange?.({
+          country: defaultCountry,
+          national,
+          ...result,
+        });
+      }
+    }
+  }, [defaultCountry, national, onChange]);
+
   const selected = countries.find((c) => c.code === country) ?? countries[0];
   const { e164, isValid } = useMemo(
     () => compute(country, national),
@@ -158,6 +200,7 @@ export function PhoneInput({
     if (raw.trim().startsWith("+")) {
       const parsed = parsePhoneNumberFromString(raw);
       if (parsed?.country) {
+        userSelectedRef.current = true;
         apply(parsed.country, parsed.nationalNumber);
         return;
       }
@@ -203,6 +246,7 @@ export function PhoneInput({
   };
 
   const choose = (c: Country) => {
+    userSelectedRef.current = true;
     apply(c.code, national);
     closeMenu();
     inputRef.current?.focus();

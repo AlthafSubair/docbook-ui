@@ -9,6 +9,9 @@ import type { KeyboardEvent, ClipboardEvent } from "react";
 import Title from "@/app/components/ui/Title";
 import Desc from "@/app/components/ui/Desc";
 import { Button } from "@/app/components/ui/Button";
+import { toast } from "sonner";
+import { useAuthStore } from "@/lib/stores/authStore";
+import { useSendOtp } from "@/lib/api";
 
 const OTP_LENGTH = 6;
 const RESEND_COOLDOWN = 30;
@@ -102,13 +105,35 @@ function VerifyOTPContent() {
     inputRefs.current[nextFocusIndex]?.focus();
   };
 
-  const handleResend = () => {
-    if (!canResend) return;
+  const { country, national } = useAuthStore();
+  const sendOtpMutation = useSendOtp();
+
+  const handleResend = async () => {
+    if (!canResend || sendOtpMutation.isPending) return;
     setOtp(Array(OTP_LENGTH).fill(""));
-    setTimer(RESEND_COOLDOWN);
     setError("");
-    inputRefs.current[0]?.focus();
-    // Potential API call to resend OTP goes here
+
+    if (country && national) {
+      try {
+        await sendOtpMutation.mutateAsync({
+          country,
+          number: national.replace(/\D/g, ""),
+        });
+        toast.success("New OTP sent successfully!");
+        setTimer(RESEND_COOLDOWN);
+        inputRefs.current[0]?.focus();
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Failed to resend OTP. Please try again.";
+        toast.error(message);
+        setError(message);
+      }
+    } else {
+      setTimer(RESEND_COOLDOWN);
+      inputRefs.current[0]?.focus();
+    }
   };
 
   const isComplete = otp.every((digit) => digit.length === 1);
