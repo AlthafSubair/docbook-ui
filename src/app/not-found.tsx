@@ -3,6 +3,8 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { ErrorState } from "@/app/components/ui/ErrorState";
+import { Button } from "@/app/components/ui/Button";
+import { HomeButton } from "@/app/components/ui/HomeButton";
 
 export default function NotFound() {
   const router = useRouter();
@@ -22,10 +24,18 @@ export default function NotFound() {
       badge="404 Error"
       title="Page Not Found"
       description="Oops! The page you are looking for doesn't exist, has been moved, or is temporarily unavailable."
-      primaryAction={{
-        label: "Go Back",
-        onClick: handleGoBack,
-      }}
+      actions={
+        <>
+          <HomeButton className="w-full sm:flex-1" />
+          <Button
+            variant="secondary"
+            onClick={handleGoBack}
+            className="w-full sm:flex-1 min-h-10 sm:min-h-11 text-sm"
+          >
+            Go Back
+          </Button>
+        </>
+      }
     />
   );
 }

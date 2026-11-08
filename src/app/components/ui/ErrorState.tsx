@@ -22,6 +22,7 @@ export interface ErrorStateProps {
   description: string;
   primaryAction?: ErrorAction;
   secondaryAction?: ErrorAction;
+  actions?: React.ReactNode;
   errorDigest?: string;
 }
 
@@ -33,6 +34,7 @@ export function ErrorState({
   description,
   primaryAction,
   secondaryAction,
+  actions,
   errorDigest,
 }: ErrorStateProps) {
   return (
@@ -89,34 +91,40 @@ export function ErrorState({
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3 w-full max-w-xs sm:max-w-sm mt-4 sm:mt-5 shrink-0">
-          {primaryAction && (
-            primaryAction.href ? (
-              <Link href={primaryAction.href} className="w-full sm:flex-1">
-                <Button className="w-full min-h-10 sm:min-h-11 text-sm">{primaryAction.label}</Button>
-              </Link>
-            ) : (
-              <Button onClick={primaryAction.onClick} className="w-full sm:flex-1 min-h-10 sm:min-h-11 text-sm">
-                {primaryAction.label}
-              </Button>
-            )
-          )}
+          {actions ? (
+            actions
+          ) : (
+            <>
+              {primaryAction && (
+                primaryAction.href ? (
+                  <Link href={primaryAction.href} className="w-full sm:flex-1">
+                    <Button className="w-full min-h-10 sm:min-h-11 text-sm">{primaryAction.label}</Button>
+                  </Link>
+                ) : (
+                  <Button onClick={primaryAction.onClick} className="w-full sm:flex-1 min-h-10 sm:min-h-11 text-sm">
+                    {primaryAction.label}
+                  </Button>
+                )
+              )}
 
-          {secondaryAction && (
-            secondaryAction.href ? (
-              <Link href={secondaryAction.href} className="w-full sm:flex-1">
-                <Button variant="secondary" className="w-full min-h-10 sm:min-h-11 text-sm">
-                  {secondaryAction.label}
-                </Button>
-              </Link>
-            ) : (
-              <Button
-                variant="secondary"
-                onClick={secondaryAction.onClick}
-                className="w-full sm:flex-1 min-h-10 sm:min-h-11 text-sm"
-              >
-                {secondaryAction.label}
-              </Button>
-            )
+              {secondaryAction && (
+                secondaryAction.href ? (
+                  <Link href={secondaryAction.href} className="w-full sm:flex-1">
+                    <Button variant="secondary" className="w-full min-h-10 sm:min-h-11 text-sm">
+                      {secondaryAction.label}
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button
+                    variant="secondary"
+                    onClick={secondaryAction.onClick}
+                    className="w-full sm:flex-1 min-h-10 sm:min-h-11 text-sm"
+                  >
+                    {secondaryAction.label}
+                  </Button>
+                )
+              )}
+            </>
           )}
         </div>
       </main>

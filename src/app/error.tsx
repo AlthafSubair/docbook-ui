@@ -2,6 +2,8 @@
 
 import React, { useEffect } from "react";
 import { ErrorState } from "@/app/components/ui/ErrorState";
+import { Button } from "@/app/components/ui/Button";
+import { HomeButton } from "@/app/components/ui/HomeButton";
 
 export default function ErrorBoundary({
   error,
@@ -11,7 +13,6 @@ export default function ErrorBoundary({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log unexpected runtime errors to an error reporting service if desired
     console.error("Runtime application error:", error);
   }, [error]);
 
@@ -23,15 +24,17 @@ export default function ErrorBoundary({
       title="Something Went Wrong"
       description="An unexpected error occurred while loading this page. Our team has been notified. You can try refreshing the page."
       errorDigest={error.digest}
-      primaryAction={{
-        label: "Try Again",
-        onClick: () => reset(),
-      }}
-      secondaryAction={{
-        label: "Go to Home",
-        href: "/",
-      }}
+      actions={
+        <>
+          <Button
+            onClick={() => reset()}
+            className="w-full sm:flex-1 min-h-10 sm:min-h-11 text-sm"
+          >
+            Try Again
+          </Button>
+          <HomeButton variant="secondary" className="w-full sm:flex-1" />
+        </>
+      }
     />
   );
 }
-

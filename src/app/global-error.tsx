@@ -2,6 +2,8 @@
 
 import React, { useEffect } from "react";
 import { ErrorState } from "@/app/components/ui/ErrorState";
+import { Button } from "@/app/components/ui/Button";
+import { HomeButton } from "@/app/components/ui/HomeButton";
 import "./globals.css";
 
 export default function GlobalError({
@@ -25,17 +27,19 @@ export default function GlobalError({
           title="Critical System Error"
           description="A critical error occurred while initializing DocBook. Please reload the application or try again later."
           errorDigest={error.digest}
-          primaryAction={{
-            label: "Reload Application",
-            onClick: () => reset(),
-          }}
-          secondaryAction={{
-            label: "Go to Login",
-            href: "/login",
-          }}
+          actions={
+            <>
+              <Button
+                onClick={() => reset()}
+                className="w-full sm:flex-1 min-h-10 sm:min-h-11 text-sm"
+              >
+                Reload Application
+              </Button>
+              <HomeButton variant="secondary" className="w-full sm:flex-1" />
+            </>
+          }
         />
       </body>
     </html>
   );
 }
-
