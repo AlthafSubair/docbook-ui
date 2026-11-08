@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, CalendarDays, Users, User } from "lucide-react";
+import { usePatients } from "@/lib/api/patients";
 
 export interface NavItem {
   id: string;
@@ -55,6 +56,13 @@ export const isNavItemActive = (pathname: string | null, href: string) => {
 
 export const BottomNav: React.FC = () => {
   const pathname = usePathname();
+  const { data: profiles } = usePatients();
+  const hasProfiles = Boolean(profiles && profiles.length > 0);
+
+  // If patient profiles are empty, do not show bottom navigation dock
+  if (!hasProfiles) {
+    return null;
+  }
 
   return (
     <nav

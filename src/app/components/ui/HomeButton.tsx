@@ -6,26 +6,21 @@ import { Button } from "./Button";
 import { useAuthStore } from "@/lib/stores/authStore";
 
 /**
- * Helper to compute the target home route synchronously.
+ * Helper to compute the target home route.
  * Logged-in users -> "/clinics" (Home)
  * Unauthenticated users -> "/login"
  */
-export function getHomeRoute(phoneFromStore?: string): string {
-  if (phoneFromStore) return "/clinics";
-  if (typeof window !== "undefined") {
-    const hasPhone = Boolean(localStorage.getItem("docbook_user_phone"));
-    const hasToken = Boolean(localStorage.getItem("docbook_auth_token"));
-    if (hasPhone || hasToken) return "/clinics";
-  }
-  return "/login";
+export function getHomeRoute(accessToken?: string): string {
+  const token = accessToken ?? useAuthStore.getState().accessToken;
+  return token ? "/clinics" : "/login";
 }
 
 /**
- * Hook to retrieve the current home route.
+ * Hook to retrieve the current home route based on Zustand auth state.
  */
 export function useHomeRoute(): string {
-  const phone = useAuthStore((s) => s.phone);
-  return getHomeRoute(phone);
+  const accessToken = useAuthStore((s) => s.accessToken);
+  return accessToken ? "/clinics" : "/login";
 }
 
 export interface HomeButtonProps {
@@ -46,11 +41,11 @@ export function HomeButton({
   onClick,
 }: HomeButtonProps) {
   const router = useRouter();
-  const phone = useAuthStore((s) => s.phone);
+  const accessToken = useAuthStore((s) => s.accessToken);
 
   const handleClick = () => {
     onClick?.();
-    const targetRoute = getHomeRoute(phone);
+    const targetRoute = getHomeRoute(accessToken);
     router.push(targetRoute);
   };
 

@@ -7,7 +7,7 @@ import type { KeyboardEvent, ClipboardEvent, FormEvent } from "react";
 import { toast } from "sonner";
 import { Button } from "@/app/components/ui/Button";
 import { useAuthStore } from "@/lib/stores/authStore";
-import { useSendOtp } from "@/lib/api";
+import { useSendOtp, useVerifyOtp, type VerifyOtpResponse } from "@/lib/api";
 
 const OTP_LENGTH = 6;
 const RESEND_COOLDOWN = 30;
@@ -18,17 +18,18 @@ export interface VerifyOtpFormProps {
 
 export default function VerifyOtpForm({ phone }: VerifyOtpFormProps) {
   const router = useRouter();
-  const { country, national, phone: storedPhone } = useAuthStore();
+  const { country, national, phone: storedPhone, setAuth } = useAuthStore();
   const effectivePhone = phone || storedPhone;
 
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [timer, setTimer] = useState<number>(RESEND_COOLDOWN);
-  const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
   const canResend = timer <= 0;
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   const sendOtpMutation = useSendOtp();
+  const verifyOtpMutation = useVerifyOtp();
 
   // Focus the first input on initial mount
   useEffect(() => {
@@ -43,6 +44,30 @@ export default function VerifyOtpForm({ phone }: VerifyOtpFormProps) {
     }, 1000);
     return () => clearInterval(interval);
   }, [timer]);
+
+  // Resolves the country code (falls back to localStorage or "IN")
+  const resolveCountry = (): string => {
+    if (country) return country;
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("docbook_user_country");
+      if (stored) return stored;
+    }
+    return "IN";
+  };
+
+  // Resolves the clean national number (digits only, no country dial prefix)
+  const resolveNationalNumber = (): string => {
+    if (national) return national.replace(/\D/g, "");
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("docbook_user_national");
+      if (stored) return stored.replace(/\D/g, "");
+    }
+    if (effectivePhone) {
+      const digits = effectivePhone.replace(/\D/g, "");
+      return digits.length > 10 ? digits.slice(-10) : digits;
+    }
+    return "";
+  };
 
   const handleChange = (index: number, value: string) => {
     setError("");
@@ -108,57 +133,100 @@ export default function VerifyOtpForm({ phone }: VerifyOtpFormProps) {
   };
 
   const handleResend = async () => {
-    if (!canResend || sendOtpMutation.isPending) return;
+    if (!canResend || sendOtpMutation.isPending || verifyOtpMutation.isPending) return;
     setOtp(Array(OTP_LENGTH).fill(""));
     setError("");
 
-    if (country && national) {
-      try {
-        await sendOtpMutation.mutateAsync({
-          country,
-          number: national.replace(/\D/g, ""),
-        });
-        toast.success("New OTP sent successfully!");
-        setTimer(RESEND_COOLDOWN);
-        inputRefs.current[0]?.focus();
-      } catch (err: unknown) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Failed to resend OTP. Please try again.";
-        toast.error(message);
-        setError(message);
-      }
-    } else {
+    const targetCountry = resolveCountry();
+    const targetNumber = resolveNationalNumber();
+
+    if (!targetNumber) {
+      toast.error("Session expired. Please log in again.");
+      router.push("/login");
+      return;
+    }
+
+    try {
+      await sendOtpMutation.mutateAsync({
+        country: targetCountry,
+        number: targetNumber,
+      });
+      toast.success("New OTP sent successfully!");
       setTimer(RESEND_COOLDOWN);
       inputRefs.current[0]?.focus();
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to resend OTP. Please try again.";
+      toast.error(message);
+      setError(message);
     }
   };
 
   const isComplete = otp.every((digit) => digit.length === 1);
+  const isLoading = verifyOtpMutation.isPending;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!isComplete) {
-      setError("Please enter the complete 6-digit OTP");
+    setError("");
+
+    const otpCode = otp.join("");
+
+    // 1. Validate OTP presence & length
+    if (otpCode.length !== OTP_LENGTH || !/^\d{6}$/.test(otpCode)) {
+      const msg = "Please enter the complete 6-digit OTP";
+      setError(msg);
+      toast.error(msg);
+      const firstEmpty = otp.findIndex((d) => !d);
+      inputRefs.current[firstEmpty !== -1 ? firstEmpty : 0]?.focus();
       return;
     }
 
-    setIsVerifying(true);
-    setError("");
+    // 2. Validate phone number & country
+    const targetCountry = resolveCountry();
+    const targetNumber = resolveNationalNumber();
 
-    // Simulate verification delay (replace with API call when ready)
-    setTimeout(() => {
-      setIsVerifying(false);
-      if (effectivePhone) {
-        try {
-          localStorage.setItem("docbook_user_phone", effectivePhone);
-        } catch {}
-        router.push(`/patients?phone=${encodeURIComponent(effectivePhone)}`);
-      } else {
-        router.push("/patients");
-      }
-    }, 1000);
+    if (!targetNumber) {
+      toast.error("Session expired. Please log in again.");
+      router.push("/login");
+      return;
+    }
+
+    try {
+      // 3. Submit API: POST /api/v1/auth/verify-otp
+      const response: VerifyOtpResponse = await verifyOtpMutation.mutateAsync({
+        country: targetCountry,
+        number: targetNumber,
+        otp: otpCode,
+      });
+
+      // 4. Extract tokens returned by backend
+      const { accessToken, refreshToken, message } = response;
+
+      // 5. Update auth storage (localStorage & Zustand)
+      const phoneToStore = effectivePhone || `+91${targetNumber}`;
+      setAuth(phoneToStore, targetCountry, targetNumber, {
+        accessToken,
+        refreshToken,
+      });
+
+      toast.success(message || "Authentication successful");
+
+      // 6. Navigate to Patients selection
+      router.push("/patients");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Invalid or expired OTP. Please try again.";
+      setError(message);
+      toast.error(message);
+
+      // Re-focus inputs on error
+      inputRefs.current[0]?.focus();
+      inputRefs.current[0]?.select();
+    }
   };
 
   return (
@@ -176,15 +244,16 @@ export default function VerifyOtpForm({ phone }: VerifyOtpFormProps) {
             autoComplete={index === 0 ? "one-time-code" : "off"}
             pattern="\d*"
             maxLength={1}
+            disabled={isLoading}
             value={digit}
             onChange={(e) => handleChange(index, e.target.value)}
             onKeyDown={(e) => handleKeyDown(index, e)}
             onPaste={handlePaste}
             onFocus={(e) => e.target.select()}
             aria-label={`Digit ${index + 1} of 6`}
-            className={`h-11 w-10 sm:h-12 sm:w-11 md:h-13 md:w-12 lg:h-12 lg:w-11 xl:h-13 xl:w-12 rounded-xl border-2 bg-background text-center text-lg sm:text-xl md:text-2xl font-bold text-primary-dark transition-[border-color,box-shadow,transform] duration-150 outline-none select-none ${
+            className={`h-11 w-10 sm:h-12 sm:w-11 md:h-13 md:w-12 lg:h-12 lg:w-11 xl:h-13 xl:w-12 rounded-xl border-2 bg-background text-center text-lg sm:text-xl md:text-2xl font-bold text-primary-dark transition-[border-color,box-shadow,transform] duration-150 outline-none select-none disabled:opacity-60 disabled:cursor-not-allowed ${
               error
-                ? "border-red-500 shadow-[0_2px_8px_rgba(239,68,68,0.3)] focus:shadow-[0_0_0_3px_rgba(239,68,68,0.25)]"
+                ? "border-red-500 shadow-[0_2px_8px_rgba(239,68,68,0.3)] focus:shadow-[0_0_0_3px_rgba(239,68,68,0.25)] animate-shake"
                 : digit
                   ? "border-primary shadow-[0_2px_8px_rgba(0,0,255,0.25)]"
                   : "border-primary/50 shadow-[0_2px_8px_rgba(0,0,255,0.15)]"
@@ -200,43 +269,42 @@ export default function VerifyOtpForm({ phone }: VerifyOtpFormProps) {
         </p>
       )}
 
-      {/* Resend and Edit options */}
-      <div className="flex flex-col items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-secondary-text">
-        <div className="flex items-center gap-1.5">
-          <span>Didn&apos;t receive the code?</span>
+      {/* Verify Button */}
+      <Button
+        type="submit"
+        className="w-full"
+        isLoading={isLoading}
+        disabled={isLoading || !isComplete}
+      >
+        Verify and proceed
+      </Button>
+
+      {/* Resend & Actions Row */}
+      <div className="flex items-center justify-between text-xs sm:text-sm text-secondary-text pt-1">
+        <Link
+          href="/login"
+          className="font-medium hover:text-foreground transition-colors hover:underline"
+        >
+          Change number
+        </Link>
+
+        <div>
           {canResend ? (
             <button
               type="button"
               onClick={handleResend}
-              className="font-semibold text-primary hover:underline cursor-pointer transition-colors"
+              disabled={sendOtpMutation.isPending || isLoading}
+              className="font-semibold text-primary hover:underline cursor-pointer disabled:opacity-50"
             >
-              Resend OTP
+              {sendOtpMutation.isPending ? "Sending..." : "Resend OTP"}
             </button>
           ) : (
-            <span className="font-semibold text-tertiary-text">
-              Resend in {timer}s
+            <span>
+              Resend in <span className="font-semibold">{timer}s</span>
             </span>
           )}
         </div>
-
-        <Link
-          href="/login"
-          className="text-xs font-medium text-tertiary-text hover:text-primary transition-colors"
-        >
-          Change phone number
-        </Link>
       </div>
-
-      {/* Submit Button */}
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={isVerifying}
-        isLoading={isVerifying}
-      >
-        Verify and proceed
-      </Button>
     </form>
   );
 }
-
