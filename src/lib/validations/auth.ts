@@ -1,28 +1,13 @@
 import { z } from "zod";
-import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import type { CountryCode } from "libphonenumber-js";
+import { validateCellularNumber } from "@/lib/phoneUtils";
 
+/**
+ * Validates cellular/mobile number across all supported countries.
+ * Delegates to the unified validation engine in phoneUtils.
+ */
 export function validateMobileNumber(national: string, country: string): boolean {
-  const digits = national.replace(/\D/g, "");
-  if (!digits || digits.length < 5) return false;
-
-  // Reject dummy all-repeated digits (e.g. 0000000000, 9999999999)
-  if (/^(\d)\1+$/.test(digits)) return false;
-
-  // India mobile numbers strictly start with 6, 7, 8, 9 and must be 10 digits
-  if (country === "IN") {
-    return /^[6-9]\d{9}$/.test(digits);
-  }
-
-  // General mobile check via libphonenumber-js
-  try {
-    const parsed = parsePhoneNumberFromString(national, country as CountryCode);
-    if (!parsed || !parsed.isValid()) return false;
-    const type = parsed.getType();
-    return type === "MOBILE" || type === "FIXED_LINE_OR_MOBILE" || type === undefined;
-  } catch {
-    return false;
-  }
+  return validateCellularNumber(country as CountryCode, national);
 }
 
 export const loginSchema = z

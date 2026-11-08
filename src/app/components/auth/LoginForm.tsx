@@ -34,7 +34,7 @@ export default function LoginForm() {
       country: defaultCountry,
       isValid: false,
     },
-    mode: "onSubmit",
+    mode: "onTouched",
     reValidateMode: "onChange",
   });
 
@@ -89,13 +89,12 @@ export default function LoginForm() {
             required
             error={errors.phone?.message}
             aria-label="Phone number"
+            onBlur={field.onBlur}
             onChange={(val) => {
               setValue("phone", val.e164);
               setValue("national", val.national);
               setValue("country", val.country);
-              setValue("isValid", val.isValid, {
-                shouldValidate: !!errors.phone,
-              });
+              setValue("isValid", val.isValid);
               field.onChange(val.e164);
               try {
                 localStorage.setItem("docbook_user_country", val.country);
