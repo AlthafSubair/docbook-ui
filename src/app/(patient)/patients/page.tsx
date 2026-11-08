@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { User, Mail, Calendar } from "lucide-react";
 
@@ -8,6 +8,7 @@ import Title from "@/app/components/ui/Title";
 import Desc from "@/app/components/ui/Desc";
 import { Input } from "@/app/components/ui/Input";
 import { Button } from "@/app/components/ui/Button";
+import PageLoader from "@/app/components/ui/PageLoader";
 import { ProfileCard } from "@/app/components/patients/ProfileCard";
 import { PatientProfile } from "@/types/patient";
 import {
@@ -30,7 +31,7 @@ const RELATIONSHIPS: RelationshipOption[] = [
   "Other",
 ];
 
-function PatientsContent() {
+export default function PatientsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryPhone = searchParams.get("phone");
@@ -192,11 +193,7 @@ function PatientsContent() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-8 text-secondary-text">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return (
@@ -396,19 +393,5 @@ function PatientsContent() {
         )}
       </div>
     </div>
-  );
-}
-
-export default function PatientsPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex flex-1 items-center justify-center p-8 text-secondary-text">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        </div>
-      }
-    >
-      <PatientsContent />
-    </Suspense>
   );
 }
