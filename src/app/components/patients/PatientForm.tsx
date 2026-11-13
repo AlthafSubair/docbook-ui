@@ -2,10 +2,11 @@
 
 import React, { useState, useMemo } from "react";
 import { toast } from "sonner";
-import { User, Mail, Calendar } from "lucide-react";
+import { User, Mail } from "lucide-react";
 import { Input } from "@/app/components/ui/Input";
 import { Button } from "@/app/components/ui/Button";
 import { OptionSelector } from "@/app/components/ui/OptionSelector";
+import { DatePicker } from "@/app/components/ui/DatePicker";
 import { useCreatePatient, useUpdatePatient } from "@/lib/api/patients";
 import type { PatientProfile } from "@/types/patient";
 import {
@@ -205,20 +206,17 @@ export function PatientForm({
         {/* Two Column Row: DOB & Gender */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {/* Date of Birth */}
-          <Input
+          <DatePicker
             label="Date of Birth *"
-            type="date"
             value={dob}
-            max={maxDobDate}
-            onChange={(e) => {
-              setDob(e.target.value);
+            maxDate={maxDobDate}
+            onChange={(val) => {
+              setDob(val);
               if (errors.dob) {
                 setErrors((prev) => ({ ...prev, dob: "" }));
               }
             }}
             error={errors.dob}
-            icon={<Calendar className="size-5" />}
-            required
           />
 
           {/* Sex / Gender Selector */}

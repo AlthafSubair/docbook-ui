@@ -15,6 +15,7 @@ import { ErrorCard } from "@/app/components/ui/ErrorCard";
 import Title from "@/app/components/ui/Title";
 import Desc from "@/app/components/ui/Desc";
 import { Button } from "@/app/components/ui/Button";
+import { ConfirmModal } from "@/app/components/ui/ConfirmModal";
 import type { PatientProfile } from "@/types/patient";
 
 export default function PatientsPage() {
@@ -47,6 +48,8 @@ export default function PatientsPage() {
   const activeView: "list" | "form" = hasExistingProfiles ? userView : "form";
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const activeSelectedId = selectingId ?? selectedPatient?.id ?? null;
+  const [patientToDelete, setPatientToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleFormReset = () => {
     setEditingPatient(null);
@@ -68,30 +71,37 @@ export default function PatientsPage() {
     setUserView("form");
   };
 
-  const handleDeleteProfile = async (
+  const handleDeleteProfile = (
     e: React.MouseEvent,
     id: string,
     name: string
   ) => {
     e.stopPropagation();
-    if (confirm(`Are you sure you want to remove the profile for ${name}?`)) {
-      try {
-        await deletePatientMutation.mutateAsync(id);
-        if (selectedPatient?.id === id) {
-          clearSelectedPatient();
-        }
-        if (selectingId === id) {
-          setSelectingId(null);
-        }
-        if (editingPatient?.id === id) {
-          handleFormReset();
-        }
-        toast.success("Profile removed successfully");
-      } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "Failed to delete profile";
-        toast.error(message);
+    setPatientToDelete({ id, name });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!patientToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deletePatientMutation.mutateAsync(patientToDelete.id);
+      if (selectedPatient?.id === patientToDelete.id) {
+        clearSelectedPatient();
       }
+      if (selectingId === patientToDelete.id) {
+        setSelectingId(null);
+      }
+      if (editingPatient?.id === patientToDelete.id) {
+        handleFormReset();
+      }
+      toast.success("Profile removed successfully");
+      setPatientToDelete(null);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to delete profile";
+      toast.error(message);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -245,6 +255,34 @@ export default function PatientsPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Patient Confirmation Modal */}
+      <ConfirmModal
+        isOpen={Boolean(patientToDelete)}
+        isLoading={isDeleting}
+        onClose={() => !isDeleting && setPatientToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Patient Profile?"
+        description="Are you sure you want to remove this profile? This action cannot be undone."
+        confirmText="Delete Profile"
+        cancelText="Cancel"
+      >
+        {patientToDelete && (
+          <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-50 border border-slate-100">
+            <div className="size-8 rounded-lg bg-linear-to-br from-blue-600 to-indigo-800 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+              {patientToDelete.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-bold text-slate-900 truncate">
+                {patientToDelete.name}
+              </span>
+              <span className="text-[10px] text-slate-500">
+                Patient Profile
+              </span>
+            </div>
+          </div>
+        )}
+      </ConfirmModal>
     </div>
   );
 }
