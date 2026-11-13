@@ -4,26 +4,32 @@ import { useAuthStore } from "@/lib/stores/authStore";
 import type { PatientProfile } from "@/types/patient";
 
 export interface CreatePatientPayload {
-  full_name: string;
-  phone?: string;
+  fullName: string;
+  dob: string;
+  sex: "male" | "female" | "other" | string;
+  relationship: "self" | "spouse" | "child" | "parent" | "sibling" | "other" | string;
   email?: string;
-  dob?: string;
-  sex?: string;
-  relationship?: string;
 }
 
 /**
  * Normalizes backend patient object fields so the UI always has consistent keys.
  */
 export function normalizePatient(raw: Record<string, unknown>): PatientProfile {
+  const rawRel = raw.relationship || raw.relation;
+  const normalizedRel =
+    typeof rawRel === "string" ? rawRel.toLowerCase() : "self";
+  const patientId = String(
+    raw.patientId ?? raw.patient_id ?? raw.id ?? raw._id ?? ""
+  );
+
   return {
-    id: String(raw.id || raw._id || ""),
+    id: patientId,
     phone: String(raw.phone || raw.phoneNumber || ""),
-    full_name: String(raw.full_name || raw.fullName || raw.name || "Patient"),
+    full_name: String(raw.fullName || raw.full_name || raw.name || "Patient"),
     email: raw.email ? String(raw.email) : undefined,
     dob: raw.dob ? String(raw.dob) : raw.dateOfBirth ? String(raw.dateOfBirth) : undefined,
-    sex: raw.sex ? String(raw.sex) : raw.gender ? String(raw.gender) : undefined,
-    relationship: (raw.relationship ? String(raw.relationship) : "Self") as PatientProfile["relationship"],
+    sex: raw.sex ? String(raw.sex).toLowerCase() : raw.gender ? String(raw.gender).toLowerCase() : undefined,
+    relationship: normalizedRel as PatientProfile["relationship"],
     createdAt: String(raw.createdAt || raw.created_at || new Date().toISOString()),
   };
 }
@@ -73,7 +79,24 @@ export function usePatients() {
  * POST /api/v1/patients
  */
 export async function createPatient(payload: CreatePatientPayload): Promise<PatientProfile> {
-  const response = await api.post<unknown>("/patients", payload);
+  const body: {
+    fullName: string;
+    dob: string;
+    sex: string;
+    relationship: string;
+    email?: string;
+  } = {
+    fullName: payload.fullName,
+    dob: payload.dob,
+    sex: payload.sex.toLowerCase(),
+    relationship: payload.relationship.toLowerCase(),
+  };
+
+  if (payload.email && payload.email.trim()) {
+    body.email = payload.email.trim();
+  }
+
+  const response = await api.post<unknown>("/patients", body);
   const data = response.data;
   const rawObj =
     data && typeof data === "object" && "data" in data && typeof (data as Record<string, unknown>).data === "object"

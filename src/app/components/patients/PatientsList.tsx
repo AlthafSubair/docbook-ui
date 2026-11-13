@@ -3,7 +3,8 @@
 import React from "react";
 import { User } from "lucide-react";
 import { Button } from "@/app/components/ui/Button";
-import { Spinner } from "@/app/components/ui/Spinner";
+import { LoadingState } from "@/app/components/ui/LoadingState";
+import { ErrorCard } from "@/app/components/ui/ErrorCard";
 import { ProfileCard } from "@/app/components/patients/ProfileCard";
 import type { PatientProfile } from "@/types/patient";
 
@@ -29,33 +30,16 @@ export function PatientsList({
   onAddProfile,
 }: PatientsListProps) {
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 gap-3 min-h-[220px]">
-        <Spinner size="md" />
-        <p className="text-xs text-secondary-text font-medium">
-          Fetching patient profiles...
-        </p>
-      </div>
-    );
+    return <LoadingState message="Fetching patient profiles..." />;
   }
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 px-4 gap-2 text-center border-2 border-dashed border-red-200 rounded-xl bg-red-50/40">
-        <p className="text-xs text-red-600 font-semibold">
-          Failed to load patient profiles.
-        </p>
-        <p className="text-[11px] text-slate-500 max-w-xs">
-          Please verify your network connection or try again.
-        </p>
-        <Button
-          variant="secondary"
-          onClick={onRetry}
-          className="text-xs py-1.5 px-3 min-h-8 mt-1"
-        >
-          Try Again
-        </Button>
-      </div>
+      <ErrorCard
+        title="Failed to load patient profiles."
+        description="Please verify your network connection or try again."
+        onRetry={onRetry}
+      />
     );
   }
 

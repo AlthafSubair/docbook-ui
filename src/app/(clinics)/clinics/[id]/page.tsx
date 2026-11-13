@@ -12,30 +12,30 @@ import {
   Phone,
   Search,
   CheckCircle2,
-  Calendar,
   X,
   Stethoscope,
-  Sparkles,
 } from "lucide-react";
 
 import Title from "@/app/components/ui/Title";
 import Desc from "@/app/components/ui/Desc";
 import { Button } from "@/app/components/ui/Button";
 import { RelationshipBadge } from "@/app/components/ui/RelationshipBadge";
-import { getClinicById, getDoctorsByClinicId, Doctor, Clinic } from "@/lib/clinicData";
-import { PatientProfile } from "@/types/patient";
-import { getAllProfiles } from "@/lib/patientStorage";
+import { getClinicById, getDoctorsByClinicId, type Doctor } from "@/lib/clinicData";
+import { usePatientStore } from "@/lib/stores/patientStore";
+import { usePatients } from "@/lib/api/patients";
 
 export default function ClinicDoctorsPage() {
   const router = useRouter();
   const params = useParams();
   const clinicId = (params?.id as string) || "cl_1";
 
-  const [clinic, setClinic] = useState<Clinic | null>(null);
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const clinic = useMemo(() => getClinicById(clinicId), [clinicId]);
+  const doctors = useMemo(() => getDoctorsByClinicId(clinicId), [clinicId]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("All");
-  const [selectedPatient, setSelectedPatient] = useState<PatientProfile | null>(null);
+  const selectedPatient = usePatientStore((s) => s.selectedPatient);
+  const setSelectedPatient = usePatientStore((s) => s.setSelectedPatient);
+  const { data: apiPatients } = usePatients();
 
   // Booking Modal State
   const [activeBookingDoctor, setActiveBookingDoctor] = useState<Doctor | null>(null);
@@ -44,26 +44,11 @@ export default function ClinicDoctorsPage() {
   const [bookingSuccess, setBookingSuccess] = useState<boolean>(false);
 
   useEffect(() => {
-    const c = getClinicById(clinicId);
-    if (c) {
-      setClinic(c);
-      const docs = getDoctorsByClinicId(clinicId);
-      setDoctors(docs);
+    // Fallback if no active patient is selected yet
+    if (!selectedPatient && apiPatients && apiPatients.length > 0) {
+      setSelectedPatient(apiPatients[0]);
     }
-
-    // Load active patient from storage
-    if (typeof window !== "undefined") {
-      try {
-        const raw = localStorage.getItem("docbook_selected_patient");
-        if (raw) {
-          setSelectedPatient(JSON.parse(raw));
-        } else {
-          const all = getAllProfiles();
-          if (all.length > 0) setSelectedPatient(all[0]);
-        }
-      } catch {}
-    }
-  }, [clinicId]);
+  }, [selectedPatient, apiPatients, setSelectedPatient]);
 
   // Derived specialties list
   const specialties = useMemo(() => {
@@ -430,7 +415,7 @@ export default function ClinicDoctorsPage() {
                     <span className="text-slate-400 font-medium">{activeBookingDoctor.tokenNumber}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    {activeBookingDoctor.slots.map((slot) => (
+                    {activeBookingDoctor.slots.map((slot: string) => (
                       <button
                         key={slot}
                         type="button"

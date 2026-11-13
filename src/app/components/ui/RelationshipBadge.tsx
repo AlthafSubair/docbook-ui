@@ -47,6 +47,12 @@ const RELATIONSHIP_CONFIGS: Record<string, RelationshipConfig> = {
     badgeClass: "bg-amber-50 text-amber-700 border-amber-200/90",
     iconClass: "text-amber-600",
   },
+  Sibling: {
+    icon: Users,
+    label: "Sibling",
+    badgeClass: "bg-cyan-50 text-cyan-700 border-cyan-200/90",
+    iconClass: "text-cyan-600",
+  },
   Family: {
     icon: Users,
     label: "Family",

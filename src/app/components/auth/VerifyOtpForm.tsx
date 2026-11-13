@@ -202,14 +202,11 @@ export default function VerifyOtpForm({ phone }: VerifyOtpFormProps) {
       });
 
       // 4. Extract tokens returned by backend
-      const { accessToken, refreshToken, message } = response;
+      const { accessToken, message } = response;
 
       // 5. Update auth storage (localStorage & Zustand)
       const phoneToStore = effectivePhone || `+91${targetNumber}`;
-      setAuth(phoneToStore, targetCountry, targetNumber, {
-        accessToken,
-        refreshToken,
-      });
+      setAuth(phoneToStore, targetCountry, targetNumber, accessToken);
 
       toast.success(message || "Authentication successful");
 

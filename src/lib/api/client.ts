@@ -30,8 +30,12 @@ export const api: AxiosInstance = axios.create({
 /* Request Interceptor */
 api.interceptors.request.use(
   (config) => {
-    // Inject auth accessToken directly from Zustand store
-    const accessToken = useAuthStore.getState().accessToken;
+    // Inject auth accessToken directly from Zustand store or localStorage
+    const accessToken =
+      useAuthStore.getState().accessToken ||
+      (typeof window !== "undefined"
+        ? localStorage.getItem("docbook_access_token") || ""
+        : "");
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -96,27 +100,12 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = useAuthStore.getState().refreshToken;
-
-      if (!refreshToken) {
-        isRefreshing = false;
-        useAuthStore.getState().logout();
-        if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
-          // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-          window.location.href = "/login";
-        }
-        return Promise.reject(new ApiError("Session expired. Please log in again.", 401));
-      }
-
       try {
-        // Call backend refresh endpoint with refreshToken in payload
-        const refreshResponse = await axios.post<{
-          accessToken: string;
-          refreshToken?: string;
-          token?: string;
-        }>(
+        // Call backend refresh endpoint with withCredentials: true.
+        // The browser automatically attaches the HttpOnly refreshToken cookie!
+        const refreshResponse = await axios.post<unknown>(
           `${API_BASE_URL}/auth/refresh-token`,
-          { refreshToken },
+          {},
           {
             headers: {
               "Content-Type": "application/json",
@@ -126,16 +115,27 @@ api.interceptors.response.use(
           }
         );
 
+        const resData = (refreshResponse.data || {}) as Record<string, unknown>;
+        const nestedData =
+          resData.data && typeof resData.data === "object"
+            ? (resData.data as Record<string, unknown>)
+            : null;
+
         const newAccessToken =
-          refreshResponse.data.accessToken || refreshResponse.data.token || "";
-        const newRefreshToken = refreshResponse.data.refreshToken || refreshToken;
+          (resData.accessToken as string) ||
+          (resData.access_token as string) ||
+          (resData.token as string) ||
+          (nestedData?.accessToken as string) ||
+          (nestedData?.access_token as string) ||
+          (nestedData?.token as string) ||
+          "";
 
         if (!newAccessToken) {
-          throw new Error("No access token returned from refresh");
+          throw new Error("No access token returned from refresh endpoint");
         }
 
-        // Update tokens in Zustand and localStorage
-        useAuthStore.getState().setTokens(newAccessToken, newRefreshToken);
+        // Update accessToken in Zustand and localStorage
+        useAuthStore.getState().setAccessToken(newAccessToken);
 
         // Update authorization header on the original request
         if (originalRequest.headers) {
@@ -145,7 +145,7 @@ api.interceptors.response.use(
         processQueue(null, newAccessToken);
         isRefreshing = false;
 
-        // Replay original request
+        // Replay original request with fresh access token
         return api(originalRequest);
       } catch (refreshErr) {
         processQueue(refreshErr, null);

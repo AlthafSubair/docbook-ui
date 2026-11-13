@@ -4,10 +4,14 @@ import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthStore } from "@/lib/stores/authStore";
+import { usePatientStore } from "@/lib/stores/patientStore";
 import { usePatients, useDeletePatient } from "@/lib/api/patients";
+import { useIsMounted } from "@/hooks/useIsMounted";
 import { PatientsHeader } from "@/app/components/patients/PatientsHeader";
 import { PatientsList } from "@/app/components/patients/PatientsList";
 import { PatientForm } from "@/app/components/patients/PatientForm";
+import { LoadingState } from "@/app/components/ui/LoadingState";
+import { ErrorCard } from "@/app/components/ui/ErrorCard";
 import type { PatientProfile } from "@/types/patient";
 
 export default function PatientsPage() {
@@ -22,22 +26,27 @@ export default function PatientsPage() {
   const deletePatientMutation = useDeletePatient();
 
   const profiles: PatientProfile[] = apiProfiles ?? [];
-  const [activeView, setActiveView] = useState<"list" | "form">("list");
-  const [selectingId, setSelectingId] = useState<string | null>(null);
-
   const hasExistingProfiles = profiles.length > 0;
+
+  // Patient Store for persistent active patient selection
+  const selectedPatient = usePatientStore((s) => s.selectedPatient);
+  const setSelectedPatient = usePatientStore((s) => s.setSelectedPatient);
+  const clearSelectedPatient = usePatientStore((s) => s.clearSelectedPatient);
+
+  // Hydration-safe mount detection for Next.js SSR
+  const isMounted = useIsMounted();
+
+  // View state: 'list' or 'form'.
+  // If there are no existing profiles, directly show the form.
+  const [userView, setUserView] = useState<"list" | "form">("list");
+  const activeView: "list" | "form" = hasExistingProfiles ? userView : "form";
+  const [selectingId, setSelectingId] = useState<string | null>(null);
+  const activeSelectedId = selectingId ?? selectedPatient?.id ?? null;
 
   const handleSelectProfile = (profile: PatientProfile) => {
     setSelectingId(profile.id);
-    try {
-      localStorage.setItem("docbook_selected_patient_id", profile.id);
-      localStorage.setItem("docbook_selected_patient", JSON.stringify(profile));
-    } catch {}
-
-    // Navigate to clinics page
-    setTimeout(() => {
-      router.push(`/clinics?patientId=${encodeURIComponent(profile.id)}`);
-    }, 250);
+    setSelectedPatient(profile);
+    router.push(`/clinics`);
   };
 
   const handleDeleteProfile = async (
@@ -49,6 +58,12 @@ export default function PatientsPage() {
     if (confirm(`Are you sure you want to remove the profile for ${name}?`)) {
       try {
         await deletePatientMutation.mutateAsync(id);
+        if (selectedPatient?.id === id) {
+          clearSelectedPatient();
+        }
+        if (selectingId === id) {
+          setSelectingId(null);
+        }
         toast.success("Profile removed successfully");
       } catch (err: unknown) {
         const message =
@@ -57,6 +72,21 @@ export default function PatientsPage() {
       }
     }
   };
+
+  if (!isMounted || isLoading) {
+    return <LoadingState message="Fetching patient profiles..." fullPage />;
+  }
+
+  if (isError) {
+    return (
+      <ErrorCard
+        title="Failed to load patient profiles."
+        description="Please verify your network connection or try again."
+        onRetry={() => refetch()}
+        fullPage
+      />
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col w-full items-center justify-start px-4 py-4 md:py-8">
@@ -67,7 +97,7 @@ export default function PatientsPage() {
           activeView={activeView}
           hasExistingProfiles={hasExistingProfiles}
           onToggleView={() =>
-            setActiveView((prev) => (prev === "list" ? "form" : "list"))
+            setUserView((prev) => (prev === "list" ? "form" : "list"))
           }
         />
 
@@ -77,19 +107,21 @@ export default function PatientsPage() {
             profiles={profiles}
             isLoading={isLoading}
             isError={isError}
-            selectingId={selectingId}
+            selectingId={activeSelectedId}
             onSelect={handleSelectProfile}
             onDelete={handleDeleteProfile}
             onRetry={refetch}
-            onAddProfile={() => setActiveView("form")}
+            onAddProfile={() => setUserView("form")}
           />
         ) : (
           /* View 2: Form (fits the screen without scrolling) */
           <PatientForm
             phone={currentPhone}
             hasExistingProfiles={hasExistingProfiles}
-            onCancel={() => setActiveView("list")}
-            onSuccess={() => setActiveView("list")}
+            onCancel={() => setUserView("list")}
+            onSuccess={() => {
+              setUserView("list");
+            }}
           />
         )}
       </div>

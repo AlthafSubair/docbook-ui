@@ -11,14 +11,12 @@ interface AuthState {
   country: string;
   national: string;
   accessToken: string;
-  refreshToken: string;
   setAuth: (
     phone: string,
     country?: string,
     national?: string,
-    tokens?: AuthTokens | string
+    tokenOrPayload?: string | AuthTokens
   ) => void;
-  setTokens: (accessToken: string, refreshToken?: string) => void;
   setAccessToken: (accessToken: string) => void;
   logout: () => void;
 }
@@ -26,22 +24,30 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      phone: "",
-      country: "IN",
-      national: "",
-      accessToken: "",
-      refreshToken: "",
+      phone:
+        typeof window !== "undefined"
+          ? localStorage.getItem("docbook_user_phone") || ""
+          : "",
+      country:
+        typeof window !== "undefined"
+          ? localStorage.getItem("docbook_user_country") || "IN"
+          : "IN",
+      national:
+        typeof window !== "undefined"
+          ? localStorage.getItem("docbook_user_national") || ""
+          : "",
+      accessToken:
+        typeof window !== "undefined"
+          ? localStorage.getItem("docbook_access_token") || ""
+          : "",
 
-      setAuth: (phone, country, national, tokens) => {
-        let accToken = "";
-        let refToken = "";
-
-        if (typeof tokens === "string") {
-          accToken = tokens;
-        } else if (tokens && typeof tokens === "object") {
-          accToken = tokens.accessToken || "";
-          refToken = tokens.refreshToken || "";
-        }
+      setAuth: (phone, country, national, tokenOrPayload) => {
+        const rawToken =
+          typeof tokenOrPayload === "string"
+            ? tokenOrPayload
+            : tokenOrPayload && typeof tokenOrPayload === "object"
+            ? tokenOrPayload.accessToken || ""
+            : "";
 
         try {
           localStorage.setItem("docbook_user_phone", phone);
@@ -51,34 +57,17 @@ export const useAuthStore = create<AuthState>()(
           if (national) {
             localStorage.setItem("docbook_user_national", national);
           }
-          if (accToken) {
-            localStorage.setItem("docbook_access_token", accToken);
+          if (rawToken) {
+            localStorage.setItem("docbook_access_token", rawToken);
           }
-          if (refToken) {
-            localStorage.setItem("docbook_refresh_token", refToken);
-          }
+          localStorage.removeItem("docbook_refresh_token");
         } catch {}
 
         set((state) => ({
           phone,
           country: country || state.country,
           national: national || state.national,
-          accessToken: accToken || state.accessToken,
-          refreshToken: refToken || state.refreshToken,
-        }));
-      },
-
-      setTokens: (accessToken: string, refreshToken?: string) => {
-        try {
-          localStorage.setItem("docbook_access_token", accessToken);
-          if (refreshToken) {
-            localStorage.setItem("docbook_refresh_token", refreshToken);
-          }
-        } catch {}
-
-        set((state) => ({
-          accessToken,
-          refreshToken: refreshToken || state.refreshToken,
+          accessToken: rawToken || state.accessToken,
         }));
       },
 
@@ -100,7 +89,6 @@ export const useAuthStore = create<AuthState>()(
           phone: "",
           national: "",
           accessToken: "",
-          refreshToken: "",
         });
       },
     }),
