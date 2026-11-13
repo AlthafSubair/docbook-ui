@@ -15,6 +15,7 @@ export interface PatientsListProps {
   selectingId?: string | null;
   onSelect: (profile: PatientProfile) => void;
   onDelete: (e: React.MouseEvent, id: string, name: string) => void;
+  onEdit?: (e: React.MouseEvent, profile: PatientProfile) => void;
   onRetry: () => void;
   onAddProfile: () => void;
 }
@@ -26,6 +27,7 @@ export function PatientsList({
   selectingId,
   onSelect,
   onDelete,
+  onEdit,
   onRetry,
   onAddProfile,
 }: PatientsListProps) {
@@ -74,6 +76,7 @@ export function PatientsList({
           isSelected={selectingId === profile.id}
           onSelect={onSelect}
           onDelete={onDelete}
+          onEdit={onEdit}
         />
       ))}
     </div>

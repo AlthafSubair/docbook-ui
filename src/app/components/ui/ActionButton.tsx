@@ -3,7 +3,7 @@
 import React from "react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-export type ActionButtonVariant = "danger" | "default" | "primary";
+export type ActionButtonVariant = "danger" | "default" | "primary" | "success";
 
 export interface ActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: ReactNode;
@@ -15,6 +15,7 @@ const variantStyles: Record<ActionButtonVariant, string> = {
   danger: "text-slate-400 hover:text-red-600 active:text-red-700 hover:bg-red-50 active:bg-red-100",
   default: "text-slate-400 hover:text-slate-700 active:text-slate-900 hover:bg-slate-100 active:bg-slate-200",
   primary: "text-primary hover:text-primary-dark hover:bg-blue-50 active:bg-blue-100",
+  success: "text-slate-400 hover:text-emerald-600 active:text-emerald-700 hover:bg-emerald-50 active:bg-emerald-100",
 };
 
 export const ActionButton: React.FC<ActionButtonProps> = ({

@@ -18,7 +18,7 @@ export function PatientsHeader({
 }: PatientsHeaderProps) {
   if (activeView === "list") {
     return (
-      <div className="flex items-center justify-between gap-3 pb-1 border-b border-slate-100">
+      <div className="flex items-center justify-between gap-3 pb-1">
         <div className="flex flex-col gap-0.5">
           <Title className="text-xl md:text-2xl font-bold">
             Patient Profiles
