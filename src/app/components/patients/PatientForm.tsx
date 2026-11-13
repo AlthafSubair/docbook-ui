@@ -61,6 +61,16 @@ export function PatientForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const resetForm = () => {
+    setFullName("");
+    setEmail("");
+    setDob("");
+    setSex("");
+    setCustomSex("");
+    setRelationship(hasExistingProfiles ? "spouse" : "self");
+    setErrors({});
+  };
+
   const maxDobDate = useMemo(() => {
     const today = new Date();
     return today.toISOString().split("T")[0];
@@ -123,6 +133,7 @@ export function PatientForm({
         toast.success("Patient profile created successfully!");
       }
 
+      resetForm();
       onSuccess(savedPatient);
     } catch (err: unknown) {
       const message =
@@ -138,7 +149,7 @@ export function PatientForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex md:flex-1 flex-col md:justify-between gap-2.5 sm:gap-3.5">
+    <form onSubmit={handleSubmit} className="flex lg:flex-1 flex-col lg:justify-between gap-2.5 sm:gap-3.5">
       {/* Form Fields Section */}
       <div className="flex flex-col gap-2.5">
         {/* Relationship selector */}
@@ -246,14 +257,17 @@ export function PatientForm({
         )}
       </div>
 
-      {/* Form Action Buttons: directly after inputs on mobile, anchored to bottom on tablets/desktop */}
-      <div className="flex items-center gap-2 pt-1.5 md:pt-4 md:mt-auto">
+      {/* Form Action Buttons: directly after inputs on mobile/tablet, anchored to bottom on desktop */}
+      <div className="flex items-center gap-2 pt-1.5 lg:pt-4 lg:mt-auto">
         {hasExistingProfiles && (
           <Button
             type="button"
             variant="secondary"
-            onClick={onCancel}
-            className="flex-1 min-h-11 md:min-h-12"
+            onClick={() => {
+              resetForm();
+              onCancel();
+            }}
+            className={`${isEditing ? "flex-1" : "flex-1 lg:hidden"} min-h-11 lg:min-h-12`}
             disabled={isSubmitting}
           >
             Cancel
@@ -261,11 +275,11 @@ export function PatientForm({
         )}
         <Button
           type="submit"
-          className="flex-1 min-h-11 md:min-h-12"
+          className="flex-1 min-h-11 lg:min-h-12"
           isLoading={isSubmitting}
           disabled={isSubmitting}
         >
-          {isEditing ? "Update Profile" : "Save Profile"}
+          {isEditing ? "Update Profile" : "Add Profile"}
         </Button>
       </div>
     </form>

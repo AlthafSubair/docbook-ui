@@ -68,7 +68,7 @@ export function PatientsList({
   }
 
   return (
-    <div className="flex flex-col gap-2 max-h-[62vh] overflow-y-auto pr-0.5">
+    <div className="flex flex-col gap-2">
       {profiles.map((profile) => (
         <ProfileCard
           key={profile.id}
