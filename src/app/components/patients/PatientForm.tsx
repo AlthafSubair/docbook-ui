@@ -6,7 +6,7 @@ import { User, Mail, Calendar } from "lucide-react";
 import { Input } from "@/app/components/ui/Input";
 import { Button } from "@/app/components/ui/Button";
 import { OptionSelector } from "@/app/components/ui/OptionSelector";
-import { useCreatePatient } from "@/lib/api/patients";
+import { useCreatePatient, useUpdatePatient } from "@/lib/api/patients";
 import type { PatientProfile } from "@/types/patient";
 import {
   patientFormSchema,
@@ -23,24 +23,39 @@ export const RELATIONSHIPS = RELATIONSHIP_OPTIONS;
 export interface PatientFormProps {
   phone?: string;
   hasExistingProfiles: boolean;
+  initialData?: PatientProfile | null;
   onCancel: () => void;
   onSuccess: (patient: PatientProfile) => void;
 }
 
 export function PatientForm({
   hasExistingProfiles,
+  initialData,
   onCancel,
   onSuccess,
 }: PatientFormProps) {
+  const isEditing = Boolean(initialData?.id);
   const createPatientMutation = useCreatePatient();
+  const updatePatientMutation = useUpdatePatient();
 
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [dob, setDob] = useState("");
-  const [sex, setSex] = useState<SexOption | "">("");
-  const [customSex, setCustomSex] = useState("");
+  const [fullName, setFullName] = useState(initialData?.full_name || "");
+  const [email, setEmail] = useState(initialData?.email || "");
+  const [dob, setDob] = useState(initialData?.dob || "");
+
+  const initialSexValue = initialData?.sex?.toLowerCase() || "";
+  const isKnownSex = ["male", "female", "other"].includes(initialSexValue);
+
+  const [sex, setSex] = useState<SexOption | "">(
+    isKnownSex ? (initialSexValue as SexOption) : initialSexValue ? "other" : ""
+  );
+  const [customSex, setCustomSex] = useState(
+    initialSexValue && !["male", "female"].includes(initialSexValue)
+      ? initialData?.sex || ""
+      : ""
+  );
   const [relationship, setRelationship] = useState<RelationshipOption>(
-    hasExistingProfiles ? "spouse" : "self"
+    (initialData?.relationship?.toLowerCase() as RelationshipOption) ||
+      (hasExistingProfiles ? "spouse" : "self")
   );
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -86,19 +101,36 @@ export function PatientForm({
       sex === "other" ? customSex.trim().toLowerCase() || "other" : sex;
 
     try {
-      const createdPatient = await createPatientMutation.mutateAsync({
-        fullName: fullName.trim(),
-        dob,
-        sex: effectiveSex,
-        relationship,
-        ...(email.trim() ? { email: email.trim() } : {}),
-      });
+      let savedPatient: PatientProfile;
+      if (isEditing && initialData?.id) {
+        savedPatient = await updatePatientMutation.mutateAsync({
+          id: initialData.id,
+          fullName: fullName.trim(),
+          dob,
+          sex: effectiveSex,
+          relationship,
+          ...(email.trim() ? { email: email.trim() } : {}),
+        });
+        toast.success("Patient profile updated successfully!");
+      } else {
+        savedPatient = await createPatientMutation.mutateAsync({
+          fullName: fullName.trim(),
+          dob,
+          sex: effectiveSex,
+          relationship,
+          ...(email.trim() ? { email: email.trim() } : {}),
+        });
+        toast.success("Patient profile created successfully!");
+      }
 
-      toast.success("Patient profile created successfully!");
-      onSuccess(createdPatient);
+      onSuccess(savedPatient);
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "Failed to create patient profile";
+        err instanceof Error
+          ? err.message
+          : isEditing
+          ? "Failed to update patient profile"
+          : "Failed to create patient profile";
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -106,119 +138,122 @@ export function PatientForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2.5">
-      {/* Relationship selector */}
-      <OptionSelector<RelationshipOption>
-        label="Relationship *"
-        options={RELATIONSHIPS}
-        value={relationship}
-        onChange={(val) => {
-          setRelationship(val);
-          if (errors.relationship) {
-            setErrors((prev) => ({ ...prev, relationship: "" }));
-          }
-        }}
-        gridClassName="grid-cols-3 sm:grid-cols-6 gap-1"
-        size="sm"
-        error={errors.relationship}
-      />
-
-      {/* Full Name */}
-      <Input
-        label="Full Name *"
-        placeholder="e.g. Rahul Sharma"
-        value={fullName}
-        onChange={(e) => {
-          setFullName(e.target.value);
-          if (errors.fullName) {
-            setErrors((prev) => ({ ...prev, fullName: "" }));
-          }
-        }}
-        error={errors.fullName}
-        maxLength={150}
-        icon={<User className="size-5" />}
-        required
-      />
-
-      {/* Email Address */}
-      <Input
-        label="Email Address"
-        placeholder="e.g. rahul@example.com (optional)"
-        type="email"
-        value={email}
-        onChange={(e) => {
-          setEmail(e.target.value);
-          if (errors.email) {
-            setErrors((prev) => ({ ...prev, email: "" }));
-          }
-        }}
-        error={errors.email}
-        maxLength={255}
-        icon={<Mail className="size-5" />}
-      />
-
-      {/* Two Column Row: DOB & Gender */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {/* Date of Birth */}
-        <Input
-          label="Date of Birth *"
-          type="date"
-          value={dob}
-          max={maxDobDate}
-          onChange={(e) => {
-            setDob(e.target.value);
-            if (errors.dob) {
-              setErrors((prev) => ({ ...prev, dob: "" }));
+    <form onSubmit={handleSubmit} className="flex md:flex-1 flex-col md:justify-between gap-2.5 sm:gap-3.5">
+      {/* Form Fields Section */}
+      <div className="flex flex-col gap-2.5">
+        {/* Relationship selector */}
+        <OptionSelector<RelationshipOption>
+          label="Relationship *"
+          options={RELATIONSHIPS}
+          value={relationship}
+          onChange={(val) => {
+            setRelationship(val);
+            if (errors.relationship) {
+              setErrors((prev) => ({ ...prev, relationship: "" }));
             }
           }}
-          error={errors.dob}
-          icon={<Calendar className="size-5" />}
+          gridClassName="grid-cols-3 sm:grid-cols-6 gap-1"
+          size="sm"
+          error={errors.relationship}
+        />
+
+        {/* Full Name */}
+        <Input
+          label="Full Name *"
+          placeholder="e.g. Rahul Sharma"
+          value={fullName}
+          onChange={(e) => {
+            setFullName(e.target.value);
+            if (errors.fullName) {
+              setErrors((prev) => ({ ...prev, fullName: "" }));
+            }
+          }}
+          error={errors.fullName}
+          maxLength={150}
+          icon={<User className="size-5" />}
           required
         />
 
-        {/* Sex / Gender Selector */}
-        <OptionSelector<SexOption>
-          label="Sex / Gender *"
-          options={SEX_OPTIONS}
-          value={sex}
-          onChange={(val) => {
-            setSex(val);
-            if (errors.sex) {
-              setErrors((prev) => ({ ...prev, sex: "" }));
+        {/* Email Address */}
+        <Input
+          label="Email Address"
+          placeholder="e.g. rahul@example.com (optional)"
+          type="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (errors.email) {
+              setErrors((prev) => ({ ...prev, email: "" }));
             }
           }}
-          gridClassName="grid-cols-3 gap-1"
-          size="md"
-          error={errors.sex}
+          error={errors.email}
+          maxLength={255}
+          icon={<Mail className="size-5" />}
         />
+
+        {/* Two Column Row: DOB & Gender */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {/* Date of Birth */}
+          <Input
+            label="Date of Birth *"
+            type="date"
+            value={dob}
+            max={maxDobDate}
+            onChange={(e) => {
+              setDob(e.target.value);
+              if (errors.dob) {
+                setErrors((prev) => ({ ...prev, dob: "" }));
+              }
+            }}
+            error={errors.dob}
+            icon={<Calendar className="size-5" />}
+            required
+          />
+
+          {/* Sex / Gender Selector */}
+          <OptionSelector<SexOption>
+            label="Sex / Gender *"
+            options={SEX_OPTIONS}
+            value={sex}
+            onChange={(val) => {
+              setSex(val);
+              if (errors.sex) {
+                setErrors((prev) => ({ ...prev, sex: "" }));
+              }
+            }}
+            gridClassName="grid-cols-3 gap-1"
+            size="md"
+            error={errors.sex}
+          />
+        </div>
+
+        {/* Custom Sex input when "other" is chosen */}
+        {sex === "other" && (
+          <Input
+            label="Specify Gender / Self-Identify *"
+            placeholder="e.g. Non-Binary, Prefer not to say"
+            value={customSex}
+            onChange={(e) => {
+              setCustomSex(e.target.value);
+              if (errors.customSex) {
+                setErrors((prev) => ({ ...prev, customSex: "" }));
+              }
+            }}
+            error={errors.customSex}
+            maxLength={30}
+            required
+          />
+        )}
       </div>
 
-      {/* Custom Sex input when "other" is chosen */}
-      {sex === "other" && (
-        <Input
-          label="Specify Gender / Self-Identify *"
-          placeholder="e.g. Non-Binary, Prefer not to say"
-          value={customSex}
-          onChange={(e) => {
-            setCustomSex(e.target.value);
-            if (errors.customSex) {
-              setErrors((prev) => ({ ...prev, customSex: "" }));
-            }
-          }}
-          error={errors.customSex}
-          maxLength={30}
-          required
-        />
-      )}
-
-      {/* Form Action Buttons */}
-      <div className="flex items-center gap-2 pt-1">
+      {/* Form Action Buttons: directly after inputs on mobile, anchored to bottom on tablets/desktop */}
+      <div className="flex items-center gap-2 pt-1.5 md:pt-4 md:mt-auto">
         {hasExistingProfiles && (
           <Button
             type="button"
             variant="secondary"
             onClick={onCancel}
-            className="flex-1 min-h-11"
+            className="flex-1 min-h-11 md:min-h-12"
             disabled={isSubmitting}
           >
             Cancel
@@ -226,11 +261,11 @@ export function PatientForm({
         )}
         <Button
           type="submit"
-          className="flex-1 min-h-11"
+          className="flex-1 min-h-11 md:min-h-12"
           isLoading={isSubmitting}
           disabled={isSubmitting}
         >
-          Save Profile
+          {isEditing ? "Update Profile" : "Save Profile"}
         </Button>
       </div>
     </form>

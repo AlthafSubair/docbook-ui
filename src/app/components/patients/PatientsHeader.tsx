@@ -8,12 +8,14 @@ import { Button } from "@/app/components/ui/Button";
 export interface PatientsHeaderProps {
   activeView: "list" | "form";
   hasExistingProfiles: boolean;
+  isEditing?: boolean;
   onToggleView: () => void;
 }
 
 export function PatientsHeader({
   activeView,
   hasExistingProfiles,
+  isEditing = false,
   onToggleView,
 }: PatientsHeaderProps) {
   if (activeView === "list") {
@@ -42,11 +44,17 @@ export function PatientsHeader({
   return (
     <div className="flex flex-col gap-1 text-center">
       <Title className="text-center text-xl md:text-2xl">
-        {hasExistingProfiles ? "Add Patient Profile" : "Create Patient Profile"}
+        {isEditing
+          ? "Edit Patient Profile"
+          : hasExistingProfiles
+          ? "Add Patient Profile"
+          : "Create Patient Profile"}
       </Title>
 
       <Desc className="text-center text-xs md:text-sm text-secondary-text">
-        One account can hold multiple profiles for yourself, family, or friends
+        {isEditing
+          ? "Update details for this patient profile"
+          : "One account can hold multiple profiles for yourself, family, or friends"}
       </Desc>
     </div>
   );

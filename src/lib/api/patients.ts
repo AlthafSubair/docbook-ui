@@ -118,6 +118,76 @@ export function useCreatePatient() {
   });
 }
 
+export interface UpdatePatientPayload {
+  id: string;
+  fullName: string;
+  dob: string;
+  sex: string;
+  relationship: string;
+  email?: string;
+}
+
+/**
+ * Update an existing patient profile
+ * PATCH or PUT /api/v1/patients/:id
+ */
+export async function updatePatient(payload: UpdatePatientPayload): Promise<PatientProfile> {
+  const { id, ...rest } = payload;
+  const body: {
+    fullName: string;
+    dob: string;
+    sex: string;
+    relationship: string;
+    email?: string;
+  } = {
+    fullName: rest.fullName,
+    dob: rest.dob,
+    sex: rest.sex.toLowerCase(),
+    relationship: rest.relationship.toLowerCase(),
+  };
+
+  if (rest.email && rest.email.trim()) {
+    body.email = rest.email.trim();
+  }
+
+  let response;
+  try {
+    response = await api.patch<unknown>(`/patients/${id}`, body);
+  } catch (err: unknown) {
+    if (
+      err &&
+      typeof err === "object" &&
+      "status" in err &&
+      ((err as { status?: number }).status === 404 ||
+        (err as { status?: number }).status === 405)
+    ) {
+      response = await api.put<unknown>(`/patients/${id}`, body);
+    } else {
+      throw err;
+    }
+  }
+
+  const data = response.data;
+  const rawObj =
+    data && typeof data === "object" && "data" in data && typeof (data as Record<string, unknown>).data === "object"
+      ? (data as Record<string, unknown>).data
+      : data;
+  return normalizePatient(rawObj as Record<string, unknown>);
+}
+
+/**
+ * TanStack Query Mutation hook to update a patient profile
+ */
+export function useUpdatePatient() {
+  const queryClient = useQueryClient();
+  return useMutation<PatientProfile, ApiError, UpdatePatientPayload>({
+    mutationFn: updatePatient,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
+    },
+  });
+}
+
 /**
  * Delete a patient profile
  * DELETE /api/v1/patients/:id

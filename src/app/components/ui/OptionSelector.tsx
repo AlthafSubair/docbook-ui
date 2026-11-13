@@ -35,11 +35,11 @@ export function OptionButton({
 }: OptionButtonProps) {
   const sizeStyles =
     size === "sm"
-      ? "h-8 sm:h-8.5 px-1.5 text-xs rounded-lg sm:rounded-xl"
-      : "h-11 px-3 text-xs sm:text-sm rounded-xl";
+      ? "h-8.5 px-1.5 text-xs rounded-xl"
+      : "h-12 px-3 text-xs sm:text-sm rounded-xl";
 
   const stateStyles = isSelected
-    ? "bg-[image:var(--button-gradient)] text-white border-transparent shadow-[0_2px_10px_rgba(0,0,255,0.32)] scale-[1.01]"
+    ? "bg-[image:var(--button-gradient)] bg-origin-border bg-no-repeat text-white border-transparent shadow-[0_2px_10px_rgba(0,0,255,0.32)]"
     : hasError
       ? "bg-white border-red-500 text-red-600 shadow-[0_2px_8px_rgba(239,68,68,0.25)] hover:border-red-600"
       : "bg-white border-primary/50 text-slate-700 shadow-[0_2px_8px_rgba(0,0,255,0.15)] hover:border-primary hover:shadow-[0_2px_8px_rgba(0,0,255,0.25)] hover:text-primary";
@@ -93,9 +93,9 @@ export function OptionSelector<T extends string = string>({
   disabled = false,
 }: OptionSelectorProps<T>) {
   return (
-    <div className={`flex flex-col gap-1 ${className}`.trim()}>
+    <div className={`flex flex-col gap-2 ${className}`.trim()}>
       {label && (
-        <label className="text-xs font-semibold text-slate-700">
+        <label className="text-sm font-semibold text-slate-700">
           {label}
         </label>
       )}

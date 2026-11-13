@@ -39,6 +39,7 @@ export default function PatientsPage() {
   // View state: 'list' or 'form'.
   // If there are no existing profiles, directly show the form.
   const [userView, setUserView] = useState<"list" | "form">("list");
+  const [editingPatient, setEditingPatient] = useState<PatientProfile | null>(null);
   const activeView: "list" | "form" = hasExistingProfiles ? userView : "form";
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const activeSelectedId = selectingId ?? selectedPatient?.id ?? null;
@@ -47,6 +48,15 @@ export default function PatientsPage() {
     setSelectingId(profile.id);
     setSelectedPatient(profile);
     router.push(`/clinics`);
+  };
+
+  const handleEditProfile = (
+    e: React.MouseEvent,
+    profile: PatientProfile
+  ) => {
+    e.stopPropagation();
+    setEditingPatient(profile);
+    setUserView("form");
   };
 
   const handleDeleteProfile = async (
@@ -91,14 +101,16 @@ export default function PatientsPage() {
   return (
     <div className="flex flex-1 flex-col w-full items-center justify-start px-4 py-4 md:py-8">
       {/* Container starting from top */}
-      <div className="w-full max-w-md flex flex-col gap-3.5">
+      <div className="w-full max-w-md flex md:flex-1 flex-col gap-3.5">
         {/* Top Header: Title, Description, and Toggle Button */}
         <PatientsHeader
           activeView={activeView}
           hasExistingProfiles={hasExistingProfiles}
-          onToggleView={() =>
-            setUserView((prev) => (prev === "list" ? "form" : "list"))
-          }
+          isEditing={Boolean(editingPatient)}
+          onToggleView={() => {
+            setEditingPatient(null);
+            setUserView((prev) => (prev === "list" ? "form" : "list"));
+          }}
         />
 
         {/* View 1: List profiles (Clicking selects and navigates to next page) */}
@@ -110,16 +122,26 @@ export default function PatientsPage() {
             selectingId={activeSelectedId}
             onSelect={handleSelectProfile}
             onDelete={handleDeleteProfile}
+            onEdit={handleEditProfile}
             onRetry={refetch}
-            onAddProfile={() => setUserView("form")}
+            onAddProfile={() => {
+              setEditingPatient(null);
+              setUserView("form");
+            }}
           />
         ) : (
           /* View 2: Form (fits the screen without scrolling) */
           <PatientForm
+            key={editingPatient?.id || "new"}
             phone={currentPhone}
             hasExistingProfiles={hasExistingProfiles}
-            onCancel={() => setUserView("list")}
+            initialData={editingPatient}
+            onCancel={() => {
+              setEditingPatient(null);
+              setUserView("list");
+            }}
             onSuccess={() => {
+              setEditingPatient(null);
               setUserView("list");
             }}
           />
