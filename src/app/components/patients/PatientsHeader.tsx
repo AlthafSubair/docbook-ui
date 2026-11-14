@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import Title from "@/app/components/ui/Title";
-import Desc from "@/app/components/ui/Desc";
+import { Title, Desc } from "docbook-ui-package";
 import { Button } from "@/app/components/ui/Button";
 
 export interface PatientsHeaderProps {

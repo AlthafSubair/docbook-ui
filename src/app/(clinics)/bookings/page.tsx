@@ -3,8 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { CalendarDays, Clock, MapPin, ChevronRight, CheckCircle2 } from "lucide-react";
-import Title from "@/app/components/ui/Title";
-import Desc from "@/app/components/ui/Desc";
+import { Title, Desc } from "docbook-ui-package";
 
 export default function BookingsPage() {
   const appointments = [

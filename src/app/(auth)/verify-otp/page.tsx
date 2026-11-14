@@ -2,8 +2,7 @@
 
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import Title from "@/app/components/ui/Title";
-import Desc from "@/app/components/ui/Desc";
+import { Title, Desc } from "docbook-ui-package";
 import VerifyOtpForm from "@/app/components/auth/VerifyOtpForm";
 
 export default function VerifyOTPPage() {

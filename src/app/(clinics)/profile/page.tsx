@@ -3,8 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { User, Phone, Shield, Bell, HelpCircle, LogOut, ChevronRight } from "lucide-react";
-import Title from "@/app/components/ui/Title";
-import Desc from "@/app/components/ui/Desc";
+import { Title, Desc } from "docbook-ui-package";
 
 export default function ProfilePage() {
   const menuItems = [

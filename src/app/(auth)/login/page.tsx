@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Title from "@/app/components/ui/Title";
-import Desc from "@/app/components/ui/Desc";
+import { Title, Desc } from "docbook-ui-package";
 import LoginForm from "@/app/components/auth/LoginForm";
 
 const LoginPage = () => {

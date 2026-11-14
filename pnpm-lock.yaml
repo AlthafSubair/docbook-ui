@@ -175,6 +175,9 @@ importers:
       axios:
         specifier: ^1.21.0
         version: 1.21.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+      docbook-ui-package:
+        specifier: file:../docbook-package-ui/docbook-ui-package-0.1.0.tgz
+        version: file:../docbook-package-ui/docbook-ui-package-0.1.0.tgz(@types/react@19.3.0)
       flag-icons:
         specifier: ^7.6.0
         version: 7.6.0
@@ -1370,6 +1373,10 @@ packages:
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
+
+  docbook-ui-package@file:../docbook-package-ui/docbook-ui-package-0.1.0.tgz:
+    resolution: {integrity: sha512-TSzpTJZFbxJxvnYgkMmXXZvYwjWsYcj1EUd7Xa1X2XHwaM6vijl1I4hVueT/y4aLqCwbeWlzIspGxArkFigB4g==, tarball: file:../docbook-package-ui/docbook-ui-package-0.1.0.tgz}
+    version: 0.1.0
 
   doctrine@2.1.0:
     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
@@ -3595,6 +3602,14 @@ snapshots:
   delayed-stream@1.0.0: {}
 
   detect-libc@2.1.2: {}
+
+  docbook-ui-package@file:../docbook-package-ui/docbook-ui-package-0.1.0.tgz(@types/react@19.3.0):
+    dependencies:
+      lucide-react: 1.61.0(@types/react@19.3.0)(react@19.3.0)
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+    transitivePeerDependencies:
+      - '@types/react'
 
   doctrine@2.1.0:
     dependencies:
