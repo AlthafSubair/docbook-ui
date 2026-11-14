@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "./Button";
+import { Button } from "docbook-ui-package";
 import { useAuthStore } from "@/lib/stores/authStore";
 
 /**

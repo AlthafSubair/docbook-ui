@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { KeyboardEvent, ClipboardEvent, FormEvent } from "react";
 import { toast } from "sonner";
-import { Button } from "@/app/components/ui/Button";
+import { Button } from "docbook-ui-package";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { useSendOtp, useVerifyOtp, type VerifyOtpResponse } from "@/lib/api";
 

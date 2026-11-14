@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { Title, Desc } from "docbook-ui-package";
-import { Button } from "@/app/components/ui/Button";
+import { Title, Desc, Button } from "docbook-ui-package";
 
 export interface PatientsHeaderProps {
   activeView: "list" | "form";

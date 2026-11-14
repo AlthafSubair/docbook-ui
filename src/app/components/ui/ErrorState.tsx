@@ -4,8 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Stethoscope } from "lucide-react";
-import { Title, Desc } from "docbook-ui-package";
-import { Button } from "@/app/components/ui/Button";
+import { Title, Desc, Button } from "docbook-ui-package";
 
 export interface ErrorAction {
   label: string;

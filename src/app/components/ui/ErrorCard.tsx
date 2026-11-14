@@ -2,7 +2,7 @@
 
 import React from "react";
 import { AlertCircle } from "lucide-react";
-import { Button } from "@/app/components/ui/Button";
+import { Button } from "docbook-ui-package";
 
 export interface ErrorCardProps {
   /** Error heading or main message */

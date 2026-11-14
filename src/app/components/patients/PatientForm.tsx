@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { User, Mail } from "lucide-react";
 import { Input } from "@/app/components/ui/Input";
-import { Button } from "@/app/components/ui/Button";
+import { Button } from "docbook-ui-package";
 import { OptionSelector } from "@/app/components/ui/OptionSelector";
 import { DatePicker } from "@/app/components/ui/DatePicker";
 import { useCreatePatient, useUpdatePatient } from "@/lib/api/patients";

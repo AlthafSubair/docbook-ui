@@ -6,7 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { CountryCode } from "libphonenumber-js";
 import { toast } from "sonner";
-import { Button } from "@/app/components/ui/Button";
+import { Button } from "docbook-ui-package";
 import { PhoneInput } from "@/app/components/ui/PhoneInput";
 import { detectUserCountry, getClientLocalCountry } from "@/lib/countryDetection";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth";

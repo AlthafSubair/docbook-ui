@@ -12,8 +12,7 @@ import { PatientsList } from "@/app/components/patients/PatientsList";
 import { PatientForm } from "@/app/components/patients/PatientForm";
 import { LoadingState } from "@/app/components/ui/LoadingState";
 import { ErrorCard } from "@/app/components/ui/ErrorCard";
-import { Title, Desc } from "docbook-ui-package";
-import { Button } from "@/app/components/ui/Button";
+import { Title, Desc, Button } from "docbook-ui-package";
 import { ConfirmModal } from "@/app/components/ui/ConfirmModal";
 import type { PatientProfile } from "@/types/patient";
 

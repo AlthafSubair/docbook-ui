@@ -2,7 +2,7 @@
 
 import React from "react";
 import { User } from "lucide-react";
-import { Button } from "@/app/components/ui/Button";
+import { Button } from "docbook-ui-package";
 import { LoadingState } from "@/app/components/ui/LoadingState";
 import { ErrorCard } from "@/app/components/ui/ErrorCard";
 import { ProfileCard } from "@/app/components/patients/ProfileCard";
